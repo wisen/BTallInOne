@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.wisen.btsmart.ScanResultsActivity">
+
+    <item android:id="@+id/set_the_scan_filter"
+        android:title="@string/set_the_scan_filter"
+        android:orderInCategory="100"
+        />
+
+</menu>
