@@ -267,7 +267,8 @@ public class ScanResultsActivity extends AppCompatActivity {
 
         if (null != mBtAdapter) {
             mBluetoothLeScanner = mBtAdapter.getBluetoothLeScanner();
-            scanLeDevice(true);
+            if (null != mBluetoothLeScanner)
+                scanLeDevice(true);
         }
     }
 

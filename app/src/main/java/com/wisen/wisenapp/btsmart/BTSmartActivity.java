@@ -40,19 +40,25 @@ public class BTSmartActivity extends AppCompatActivity {
 
     private final String TAG = "BTSmart";
 
+    public static final String GATTServiceInfo = "GATTServiceInfo";
+
     private BluetoothDevice mDeviceToConnect = null;
     private BtSmartService mService = null;
     private TextView mStatusText;
     //private Button btn_read_Characteristic = null;
     private BluetoothGatt mGatt = null;
-    private List<BluetoothGattCharacteristic> mGattCharacterList = null;
     private List<BluetoothGattService> mGattServiceList = null;
+    private static BluetoothGattService mGattService = null;
 
     //display service list
     private static ArrayList<ServiceInfo> mServicelist = new ArrayList<ServiceInfo>();
     private static ServiceListAdapter mServicelistAdapter;
     ListView mServiceListView = null;
     private static HashSet<String> mServiceUUID = new HashSet<String>();
+
+    public static BluetoothGattService getGattService(){
+        return mGattService;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,7 +166,8 @@ public class BTSmartActivity extends AppCompatActivity {
                             for (int i = 0; i < parentActivity.mGattServiceList.size(); i++) {
                                 BluetoothGattService theService = parentActivity.mGattServiceList.get(i);
                                 Log.d(TAG, "ServiceName:" + theService.getUuid());
-                                serviceinfo = new ServiceInfo(theService.toString(),theService.getUuid().toString());
+                                Log.d(TAG, "theService:" + theService.toString());
+                                serviceinfo = new ServiceInfo(theService.toString(),theService.getUuid().toString()/*, theService*/);
                                 if (!mServiceUUID.contains(theService.getUuid().toString())){
                                     mServiceUUID.add(theService.getUuid().toString());
                                     mServicelist.add(serviceinfo);
@@ -272,8 +279,8 @@ public class BTSmartActivity extends AppCompatActivity {
             TextView serviceUUIDText = (TextView) vi.findViewById(R.id.serviceUUID);
 
             ServiceInfo info = (ServiceInfo) data.get(position);
-            servicenameText.setText(info.name);
-            serviceUUIDText.setText(info.UUID);
+            servicenameText.setText(info.getName());
+            serviceUUIDText.setText(info.getUUID());
             return vi;
         }
     }
@@ -286,7 +293,45 @@ public class BTSmartActivity extends AppCompatActivity {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             ServiceInfo info = (ServiceInfo)mServicelistAdapter.getItem(position);
+
+            if (null != mGattServiceList){
+                for (int i = 0; i < mGattServiceList.size(); i++) {
+                    BluetoothGattService theService = mGattServiceList.get(i);
+                    Log.d(TAG, "ServiceName:" + theService.getUuid());
+                    Log.d(TAG, "theService:" + theService.toString());
+                    if (theService.getUuid().toString().equals(info.getUUID())){
+                        Log.d(TAG, "i'm here!!!");
+                        mGattService = theService;
+                    }
+                }
+            }
             /*do read write action bellow*/
+            /*
+            List<BluetoothGattCharacteristic> mGattCharacterList = info.getService().getCharacteristics();
+            for (int j = 0; j < mGattCharacterList.size(); j++) {
+                Log.d(TAG,
+                        "---CharacterName:"
+                                + mGattCharacterList.get(j).getUuid());
+            }*/
+            startGattServiceActivity(info);
         }
     };
+
+    private void startGattServiceActivity(ServiceInfo info){
+        Intent intent = new Intent(this, GattServiceActivity.class);
+        intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mDeviceToConnect);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(ServiceInfo.ServiceInfoKeyString, info);
+        Log.d(TAG, "info=" + info.toString());
+        /*
+        List<BluetoothGattCharacteristic> mGattCharacterList = info.getService().getCharacteristics();
+        for (int j = 0; j < mGattCharacterList.size(); j++) {
+            Log.d(TAG,
+                    "---CharacterName:"
+                            + mGattCharacterList.get(j).getUuid());
+        }
+        */
+        intent.putExtras(bundle);
+        this.startActivity(intent);
+    }
 }
