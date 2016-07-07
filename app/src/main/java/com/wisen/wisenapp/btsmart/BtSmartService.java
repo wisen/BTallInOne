@@ -41,6 +41,22 @@ public class BtSmartService extends Service {
     private List<BluetoothGattCharacteristic> characterList;
 
     private final String TAG = "BtSmartService";
+    public final static String ACTION_GATT_CONNECTED =
+            "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
+    public final static String ACTION_GATT_DISCONNECTED =
+            "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
+    public final static String ACTION_GATT_SERVICES_DISCOVERED =
+            "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
+    public final static String ACTION_DATA_AVAILABLE =
+            "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
+    public final static String EXTRA_DATA =
+            "com.example.bluetooth.le.EXTRA_DATA";
+
+    private void broadcastBtSmartStatus(final String action) {
+        final Intent intent = new Intent(action);
+        sendBroadcast(intent);
+    }
+
     // // Enumerated type for Bluetooth Smart UUIDs.
     public enum BtSmartUuid {
         HRP_SERVICE("0000180d-0000-1000-8000-00805f9b34fb"),
@@ -335,7 +351,7 @@ public class BtSmartService extends Service {
      * Disconnect from the currently connected Bluetooth Smart device.
      */
     public void disconnect() {
-
+        Log.d(TAG,"disconnect");
         if (mGattClient != null) {
             mGattClient.disconnect();
             mGattClient.close();
@@ -591,7 +607,8 @@ public class BtSmartService extends Service {
                 Log.d(TAG, "Connected to GATT server.");
                 mGattClient.discoverServices();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                sendMessage(mClientDeviceHandler, MESSAGE_DISCONNECTED);
+                //sendMessage(mClientDeviceHandler, MESSAGE_DISCONNECTED);
+                broadcastBtSmartStatus(ACTION_GATT_DISCONNECTED);
             }
         }
 
@@ -603,22 +620,20 @@ public class BtSmartService extends Service {
                 // characteristic handlers to register themselves,
                 serviceList = gatt.getServices();
 
-                for (int i = 0; i < serviceList.size(); i++) {
-                    BluetoothGattService theService = serviceList.get(i);
+                for (BluetoothGattService theService:serviceList) {
                     Log.d(TAG, "ServiceName:" + theService.getUuid());
 
                     characterList = theService.getCharacteristics();
-                    for (int j = 0; j < characterList.size(); j++) {
+                    for (BluetoothGattCharacteristic gattCharacteristic:characterList) {
+                        mGattClient.readCharacteristic(gattCharacteristic);
                         Log.d(TAG,
                                 "---CharacterName:"
-                                        + characterList.get(j).getUuid());
-                        Log.d(TAG,
-                                "---CharacterValue:"
-                                        + characterList.get(j).getValue());
+                                        + gattCharacteristic.getUuid());
                     }
                 }
 
-                sendMessage(mClientDeviceHandler, MESSAGE_CONNECTED);
+                //sendMessage(mClientDeviceHandler, MESSAGE_CONNECTED);
+                broadcastBtSmartStatus(ACTION_GATT_CONNECTED);
             }
         }
 
@@ -716,6 +731,12 @@ public class BtSmartService extends Service {
             // can't be more than one in progress.
             // So check this is what we were expecting.
             Log.d(TAG, "onCharacteristicRead");
+            byte[] value=characteristic.getValue();
+            if (value!=null) {
+                String v = new String(value);
+                Log.d(TAG, "Value=" + v);
+            }
+            /*
             if (currentRequest.type == BtSmartRequest.RequestType.READ_CHARACTERISTIC) {
                 if (currentRequest.notifyHandler != null) {
                     if (status == BluetoothGatt.GATT_SUCCESS) {
@@ -733,7 +754,7 @@ public class BtSmartService extends Service {
                     }
                 }
                 processNextRequest();
-            }
+            }*/
         }
     };
 

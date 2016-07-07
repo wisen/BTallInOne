@@ -5,9 +5,11 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
@@ -43,23 +45,27 @@ public class BTSmartActivity extends AppCompatActivity {
     public static final String GATTServiceInfo = "GATTServiceInfo";
 
     private BluetoothDevice mDeviceToConnect = null;
-    private BtSmartService mService = null;
+    public static BtSmartService mService = null;
     private TextView mStatusText;
     //private Button btn_read_Characteristic = null;
-    private BluetoothGatt mGatt = null;
     private List<BluetoothGattService> mGattServiceList = null;
     private static BluetoothGattService mGattService = null;
+    private static BluetoothGatt mGatt = null;
 
     //display service list
     private static ArrayList<ServiceInfo> mServicelist = new ArrayList<ServiceInfo>();
     private static ServiceListAdapter mServicelistAdapter;
     ListView mServiceListView = null;
     private static HashSet<String> mServiceUUID = new HashSet<String>();
-
     public static BluetoothGattService getGattService(){
         return mGattService;
     }
-
+    public static BluetoothGatt getGatt() {
+        return mGatt;
+    }
+    public static BtSmartService getBTSmartService(){
+        return mService;
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,6 +75,9 @@ public class BTSmartActivity extends AppCompatActivity {
         mServicelistAdapter = new ServiceListAdapter(this, mServicelist);
         mServiceListView.setAdapter(mServicelistAdapter);
         mServiceListView.setOnItemClickListener(mServicelistClickListener);
+
+
+        registerReceiver(mGattUpdateReceiver,BTSmartUtil.getmAdapterIntentFilter());
 
         mStatusText = (TextView) findViewById(R.id.statusText);
         //btn_read_Characteristic = (Button)findViewById(R.id.btn_read_Characteristic);
@@ -126,6 +135,49 @@ public class BTSmartActivity extends AppCompatActivity {
         }
     };
 
+    private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (BtSmartService.ACTION_GATT_CONNECTED.equals(action)) {
+                // Update status to show that we are connected.
+                String str = mDeviceToConnect.getName();
+                str += " ";
+                str += getString(R.string.connected_status);
+                Log.d(TAG, "str = " + getString(R.string.connected_status));
+                mStatusText.setText(str);
+                //parentActivity.btn_read_Characteristic.setEnabled(true);
+                // TODO: Your code here. Request read/write of
+                // characteristics, or register for notifications.
+                // Access these functions via the smartService
+                // reference.
+                // Pass mValueHandler as the handler when calling these
+                // request functions.
+                mGattServiceList = mService.get_GattServiceList();
+                ServiceInfo serviceinfo = null;
+                if (null != mGattServiceList){
+                    for (int i = 0; i < mGattServiceList.size(); i++) {
+                        BluetoothGattService theService = mGattServiceList.get(i);
+                        Log.d(TAG, "ServiceName:" + theService.getUuid());
+                        Log.d(TAG, "theService:" + theService.toString());
+                        serviceinfo = new ServiceInfo(theService.toString(),theService.getUuid().toString()/*, theService*/);
+                        if (!mServiceUUID.contains(theService.getUuid().toString())){
+                            mServiceUUID.add(theService.getUuid().toString());
+                            mServicelist.add(serviceinfo);
+                            mServicelistAdapter.notifyDataSetChanged();
+                        }
+                    }
+                }
+            } else if (BtSmartService.ACTION_GATT_DISCONNECTED.equals(action)) {
+                finish();
+            } else if (BtSmartService.
+                    ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
+                // Show all the supported services and characteristics on the
+                // user interface.
+            } else if (BtSmartService.ACTION_DATA_AVAILABLE.equals(action)) {
+            }
+        }
+    };
     /**
      * This is the handler for general messages about the connection.
      */
@@ -234,13 +286,20 @@ public class BTSmartActivity extends AppCompatActivity {
     };
 
     public void onDestroy() {
+        Log.e(TAG, "onDestroy");
         mService.disconnect();
         unbindService(mServiceConnection);
         Toast.makeText(this, "Disconnected from device:"+mDeviceToConnect.getName(), Toast.LENGTH_LONG).show();
         mServiceUUID.clear();
         mServicelist.clear();
         mDeviceToConnect = null;
+        unregisterReceiver(mGattUpdateReceiver);
         super.onDestroy();
+    }
+
+    public void onResume(){
+        Log.e(TAG, "onResume");
+        super.onResume();
     }
 
     /**
@@ -302,6 +361,7 @@ public class BTSmartActivity extends AppCompatActivity {
                     if (theService.getUuid().toString().equals(info.getUUID())){
                         Log.d(TAG, "i'm here!!!");
                         mGattService = theService;
+                        mGatt = mService.get_Gatt();
                     }
                 }
             }

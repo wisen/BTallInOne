@@ -30,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.wisen.wisenapp.R;
+import com.wisen.wisenapp.btsmart.BTSmartProfile;
 
 import org.w3c.dom.Text;
 
@@ -66,16 +67,23 @@ public class BTAdvActivity extends AppCompatActivity {
     private BluetoothGattServer gattServer = null;
     private BluetoothGattCharacteristic gattCharacteristic = null;
     private BluetoothGattService gattService = null;
+    private BluetoothGattDescriptor gattdescriptor = null;
 
     private void initgattServer(BluetoothManager bluetoothManager){
         gattCharacteristic = new BluetoothGattCharacteristic(
-                UUID.fromString(gattCharacteristicUUID),
-                BluetoothGattCharacteristic.PROPERTY_NOTIFY,
+                UUID.fromString(BTSmartProfile.BTS_SOne_COneUUID),
+                BluetoothGattCharacteristic.PROPERTY_READ,
                 BluetoothGattCharacteristic.PERMISSION_READ);
+        gattCharacteristic.setValue("s1c1v1");
 
-        gattCharacteristic.setValue("gattData" + gattCharacteristicData);
+        gattdescriptor = new BluetoothGattDescriptor(UUID.fromString(BTSmartProfile.BTS_SOne_COne_D1UUID), BluetoothGattDescriptor.PERMISSION_READ);
+        gattCharacteristic.addDescriptor(gattdescriptor);
+        gattdescriptor = new BluetoothGattDescriptor(UUID.fromString(BTSmartProfile.BTS_SOne_COne_D2UUID), BluetoothGattDescriptor.PERMISSION_READ);
+        gattCharacteristic.addDescriptor(gattdescriptor);
+        gattdescriptor = new BluetoothGattDescriptor(UUID.fromString(BTSmartProfile.BTS_SOne_COne_D3UUID), BluetoothGattDescriptor.PERMISSION_READ);
+        gattCharacteristic.addDescriptor(gattdescriptor);
 
-        gattService = new BluetoothGattService(UUID.fromString(gattServiceUUID),
+        gattService = new BluetoothGattService(UUID.fromString(BTSmartProfile.BTS_ServiceOneUUID),
                 BluetoothGattService.SERVICE_TYPE_PRIMARY);
 
         if (null != gattCharacteristic && null != gattService) {
