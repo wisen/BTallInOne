@@ -17,6 +17,7 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.ParcelUuid;
@@ -46,15 +47,10 @@ public class BTAdvActivity extends AppCompatActivity {
     private Button btn_is_support_peri = null;
     private Button btn_start_adv = null;
     private Button btn_stop_adv = null;
-    private Button btn_scan_adv = null;
-    private Button btn_stop_scanadv = null;
-    private Button btn_adv_changeData = null;
     private TextView tv_is_support_peri = null;
-    private TextView tv_scan_adv_result = null;
     private BluetoothManager mBluetoothManager = null;
     private BluetoothAdapter mBluetoothAdapter = null;
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser = null;
-    private BluetoothLeScanner mBluetoothLeScanner = null;
     private AdvertiseData adv_data = null;
     private AdvertiseCallback adv_callback = null;
     private AdvertiseSettings adv_setting = null;
@@ -68,6 +64,7 @@ public class BTAdvActivity extends AppCompatActivity {
     private BluetoothGattCharacteristic gattCharacteristic = null;
     private BluetoothGattService gattService = null;
     private BluetoothGattDescriptor gattdescriptor = null;
+    private static final int REQUEST_ENABLE_BT = 1;
 
     private void initgattServer(BluetoothManager bluetoothManager){
         gattCharacteristic = new BluetoothGattCharacteristic(
@@ -176,6 +173,7 @@ public class BTAdvActivity extends AppCompatActivity {
         mBluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
         mBluetoothAdapter = mBluetoothManager.getAdapter();
 
+        /*
         if(mBluetoothAdapter ==  null){
             Toast.makeText(this, R.string.bluetooth_not_supported, Toast.LENGTH_LONG).show();
             finish();
@@ -185,12 +183,17 @@ public class BTAdvActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_LONG).show();
             finish();
         }
-
-        mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
-        mBluetoothLeAdvertiser = mBluetoothAdapter.getBluetoothLeAdvertiser();
+        */
+        // Display a dialogue requesting Bluetooth to be enabled if it isn't
+        // already.
+        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        } else {
+            mBluetoothLeAdvertiser = mBluetoothAdapter.getBluetoothLeAdvertiser();
+        }
 
         tv_is_support_peri = (TextView)findViewById(R.id.tv_is_support_peri);
-        tv_scan_adv_result = (TextView)findViewById(R.id.tv_scan_adv_result);
 
         btn_is_support_peri = (Button)findViewById(R.id.btn_is_support_peri);
         btn_is_support_peri.setOnClickListener(new View.OnClickListener() {
@@ -206,6 +209,7 @@ public class BTAdvActivity extends AppCompatActivity {
 
                 if (!mBluetoothAdapter.isMultipleAdvertisementSupported()){
                     Log.e(TAG, "the device not support MultipleAdvertisement");
+                    tv_is_support_peri.setText("the device not support MultipleAdvertisement.");
                 }
             }
         });
@@ -216,6 +220,7 @@ public class BTAdvActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (null != mBluetoothLeAdvertiser) {
                     Log.e(TAG, "startAdvertising ...");
+                    tv_is_support_peri.setText("startAdvertising ...");
                     mBluetoothLeAdvertiser.startAdvertising(get_AdvertiseSetting(), get_AdvertiseData(), get_AdvertiseCallback());
                 }
             }
@@ -229,53 +234,12 @@ public class BTAdvActivity extends AppCompatActivity {
             }
         });
 
-        btn_adv_changeData = (Button)findViewById(R.id.btn_adv_changeData);
-        btn_adv_changeData.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gattCharacteristicData++;
-                Log.e(TAG, "gattCharacteristicData = " + gattCharacteristicData);
-                gattCharacteristic.setValue("gattData" + gattCharacteristicData);
-                gattServer.addService(gattService);
-            }
-        });
-
-        btn_scan_adv = (Button)findViewById(R.id.btn_scan_adv);
-        btn_scan_adv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                List<ScanFilter> filters = new ArrayList<ScanFilter>();
-
-                ScanFilter filter = new ScanFilter.Builder()
-                        .setServiceUuid(new ParcelUuid(UUID.fromString(getString(R.string.ble_test_uuid))))
-                        .build();
-                filters.add(filter);
-
-                ScanSettings settings = new ScanSettings.Builder()
-                        .setScanMode( ScanSettings.SCAN_MODE_LOW_LATENCY )
-                        .build();
-
-                mBluetoothLeScanner.startScan(null, settings, mScanCallback);
-            }
-        });
-
-        btn_stop_scanadv = (Button)findViewById(R.id.btn_stop_scanadv);
-        btn_stop_scanadv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mBluetoothLeScanner.stopScan(mScanCallback);
-                    }
-                }, 10000);
-            }
-        });
-
         //mUUID = new ParcelUuid(UUID.fromString(getString(R.string.ble_test_uuid)));
         mUUID = new ParcelUuid(UUID.fromString(gattServiceUUID));
 
         initgattServer(mBluetoothManager);
+
+
     }
 
     protected AdvertiseSettings get_AdvertiseSetting(){
@@ -309,13 +273,15 @@ public class BTAdvActivity extends AppCompatActivity {
             adv_callback = new AdvertiseCallback() {
                 @Override
                 public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-                    Log.e( "BLE", "Advertising onStartSuccess!!");
+                    Log.e(TAG, "Advertising onStartSuccess!!");
+                    tv_is_support_peri.setText("Advertising onStartSuccess!!");
                     super.onStartSuccess(settingsInEffect);
                 }
 
                 @Override
                 public void onStartFailure(int errorCode) {
-                    Log.e( "BLE", "Advertising onStartFailure: " + errorCode );
+                    Log.e(TAG, "Advertising onStartFailure: " + errorCode );
+                    tv_is_support_peri.setText("Advertising onStartFailure: " + errorCode );
                     super.onStartFailure(errorCode);
                 }
             };
@@ -324,40 +290,22 @@ public class BTAdvActivity extends AppCompatActivity {
         return adv_callback;
     }
 
-    private ScanCallback mScanCallback = new ScanCallback() {
-        @Override
-        public void onScanResult(int callbackType, ScanResult result) {
-            super.onScanResult(callbackType, result);
-            if( result == null
-                    || result.getDevice() == null
-                    || TextUtils.isEmpty(result.getDevice().getName()) )
-                return;
-
-            StringBuilder builder = new StringBuilder( result.getDevice().getName() );
-
-            builder.append("\n").append(new String(result.getScanRecord().getServiceData(result.getScanRecord().getServiceUuids().get(0)), Charset.forName("UTF-8")));
-
-            tv_scan_adv_result.setText(builder.toString());
-        }
-
-        @Override
-        public void onBatchScanResults(List<ScanResult> results) {
-            super.onBatchScanResults(results);
-        }
-
-        @Override
-        public void onScanFailed(int errorCode) {
-            Log.e("BLE", "Discovery onScanFailed: " + errorCode);
-            super.onScanFailed(errorCode);
-        }
-    };
-
-    private Handler mHandler = new Handler();
-
     private void stopAdvertise() {
         if (mBluetoothLeAdvertiser != null) {
             mBluetoothLeAdvertiser.stopAdvertising(get_AdvertiseCallback());
             mBluetoothLeAdvertiser = null;
+        }
+    }
+
+    /**
+     * Callback activated after the user responds to the enable Bluetooth dialogue.
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_ENABLE_BT && resultCode == RESULT_OK) {
+            mBluetoothLeAdvertiser = mBluetoothAdapter.getBluetoothLeAdvertiser();
+        } else {
+            Toast.makeText(this, "Bluetooth not enabled.", Toast.LENGTH_LONG).show();
         }
     }
 }

@@ -131,6 +131,7 @@ public class BtSmartService extends Service {
     public static final String EXTRA_SCAN_RECORD = "SCANRECORD";
     public static final String EXTRA_VALUE = "CVALUE";
     public static final String EXTRA_RSSI = "RSSI";
+    public static final String EXTRA_PROPERTIES = "CPROPERTIES";
     public static final String EXTRA_APPEARANCE_KEY = "APPEARKEY";
     public static final String EXTRA_APPEARANCE_NAME = "APPEARNAME";
     public static final String EXTRA_APPEARANCE_ICON = "APPEARICON";
@@ -147,6 +148,7 @@ public class BtSmartService extends Service {
     private final IBinder mBinder = new LocalBinder();
     private Handler mClientDeviceHandler = null;
     private Handler mServerDeviceHandler = null;
+    private Handler mGattServiceHandler = null;
     private BluetoothManager mBtManager = null;
     private BluetoothAdapter mBtAdapter = null;
     private BluetoothGatt mGattClient = null;
@@ -310,6 +312,9 @@ public class BtSmartService extends Service {
         mConnectedDevice = device;
     }
 
+    public void registerGattServiceHandler(Handler handler){
+        mGattServiceHandler = handler;
+    }
 
     public BluetoothGatt get_Gatt(){
         return mGattClient;
@@ -558,6 +563,24 @@ public class BtSmartService extends Service {
     }
 
     /**
+     * Helper function to send a message to a handler with bundle.
+     *
+     * @param h
+     *            The Handler to send the message to.
+     * @param msgId
+     *            The message identifier to send.
+     * @param bundle
+     *            The data which need to send to handler
+     */
+    private void sendMessage(Handler h, int msgId, Bundle bundle) {
+        if (h != null) {
+            Message msg = Message.obtain(h, msgId);
+            msg.setData(bundle);
+            msg.sendToTarget();
+        }
+    }
+
+    /**
      * Helper function to send a message to a handler with no parameters.
      *
      * @param h
@@ -736,6 +759,13 @@ public class BtSmartService extends Service {
                 String v = new String(value);
                 Log.d(TAG, "Value=" + v);
             }
+
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(EXTRA_CHARACTERISTIC_UUID, new ParcelUuid(characteristic.getUuid()));
+            bundle.putByteArray(EXTRA_VALUE, characteristic.getValue());
+            bundle.putInt(EXTRA_PROPERTIES, characteristic.getProperties());
+            sendMessage(mGattServiceHandler, MESSAGE_CHARACTERISTIC_VALUE, bundle);
+
             /*
             if (currentRequest.type == BtSmartRequest.RequestType.READ_CHARACTERISTIC) {
                 if (currentRequest.notifyHandler != null) {

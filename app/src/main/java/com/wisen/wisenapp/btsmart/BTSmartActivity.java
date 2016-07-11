@@ -345,7 +345,7 @@ public class BTSmartActivity extends AppCompatActivity {
     }
 
     /**
-     * The on-click listener for selecting a device.
+     * The on-click listener for selecting a service.
      */
     private AdapterView.OnItemClickListener mServicelistClickListener = new AdapterView.OnItemClickListener() {
 
