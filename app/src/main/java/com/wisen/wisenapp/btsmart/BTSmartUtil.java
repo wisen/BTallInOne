@@ -1,5 +1,6 @@
 package com.wisen.wisenapp.btsmart;
 
+import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.IntentFilter;
 
 /**
@@ -19,6 +20,22 @@ public class BTSmartUtil {
     public static IntentFilter getmAdapterIntentFilter(){
         initAdapterIntentFilter();
         return mAdapterIntentFilter;
+    }
+
+    public static String getPropertiesStr(int properties){
+        String str = "";
+        if ((properties & BluetoothGattCharacteristic.PROPERTY_BROADCAST) != 0)
+            str += 'b';//brocast
+        if ((properties & BluetoothGattCharacteristic.PROPERTY_READ) != 0)
+            str += 'r';//read
+        if ((properties & BluetoothGattCharacteristic.PROPERTY_WRITE) != 0)
+            str += 'w';//write
+        if ((properties & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0)
+            str += 'n';//notification
+        if ((properties & BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0)
+            str += 'i';//indication
+
+        return str;
     }
 
 }

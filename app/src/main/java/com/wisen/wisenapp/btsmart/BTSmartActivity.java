@@ -31,6 +31,7 @@ import android.widget.Toast;
 
 import com.wisen.wisenapp.MainActivity;
 import com.wisen.wisenapp.R;
+import com.wisen.wisenapp.btsmart.xiaomi.HackXiaoMiActivity;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -365,20 +366,21 @@ public class BTSmartActivity extends AppCompatActivity {
                     }
                 }
             }
-            /*do read write action bellow*/
-            /*
-            List<BluetoothGattCharacteristic> mGattCharacterList = info.getService().getCharacteristics();
-            for (int j = 0; j < mGattCharacterList.size(); j++) {
-                Log.d(TAG,
-                        "---CharacterName:"
-                                + mGattCharacterList.get(j).getUuid());
-            }*/
             startGattServiceActivity(info);
         }
     };
 
     private void startGattServiceActivity(ServiceInfo info){
-        Intent intent = new Intent(this, GattServiceActivity.class);
+        Intent intent;
+
+        if("mi".equals(mDeviceToConnect.getName().toLowerCase())){
+            Log.d(TAG, "jump to HackXiaomi Activity");
+            intent = new Intent(this, HackXiaoMiActivity.class);
+        } else {
+            Log.d(TAG, "jump to Default Activity");
+            intent = new Intent(this, GattServiceActivity.class);
+        }
+
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, mDeviceToConnect);
         Bundle bundle = new Bundle();
         bundle.putParcelable(ServiceInfo.ServiceInfoKeyString, info);

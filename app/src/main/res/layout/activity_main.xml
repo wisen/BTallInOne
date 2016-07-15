@@ -42,4 +42,13 @@
         android:layout_below="@+id/btSmartActivity"
         android:layout_alignParentStart="true"
         android:layout_marginTop="57dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="UI Main"
+        android:id="@+id/btn_uimain"
+        android:layout_below="@+id/btAdvActivity"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="58dp" />
 </RelativeLayout>

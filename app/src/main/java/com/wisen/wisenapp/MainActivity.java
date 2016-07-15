@@ -15,6 +15,7 @@ import com.wisen.wisenapp.audio.AudioMainActivity;
 import com.wisen.wisenapp.bt.BTMainActivity;
 import com.wisen.wisenapp.btadv.BTAdvActivity;
 import com.wisen.wisenapp.btsmart.ScanResultsActivity;
+import com.wisen.wisenapp.ui.UIMainActivity;
 
 /**
  * Created by wisen on 2016-06-23.
@@ -25,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private Button Btn_audioMain = null;
     private Button Btn_btSmart = null;
     private Button Btn_btAdv = null;
+    private Button Btn_UIMain = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +65,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, BTAdvActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        Btn_UIMain= (Button)findViewById(R.id.btn_uimain);
+        Btn_UIMain.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, UIMainActivity.class);
                 startActivity(intent);
             }
         });

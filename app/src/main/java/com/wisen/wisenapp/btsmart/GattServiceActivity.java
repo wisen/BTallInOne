@@ -1,6 +1,7 @@
 package com.wisen.wisenapp.btsmart;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -9,6 +10,7 @@ import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Handler;
@@ -23,6 +25,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -153,10 +157,12 @@ public class GattServiceActivity extends AppCompatActivity {
     private boolean fill_data_into_adapter(List<BluetoothGattCharacteristic> gattCharacterList){
         Log.d(TAG, "fill_data_into_adapter");
         for (BluetoothGattCharacteristic gattCharacteristic:gattCharacterList){
-            CharacteristicInfo info = new CharacteristicInfo(gattCharacteristic.getUuid().toString(),
-                    String.valueOf(gattCharacteristic.getProperties()),"Refresh");
+            //CharacteristicInfo info = new CharacteristicInfo(gattCharacteristic.getUuid().toString(),
+                    //String.valueOf(gattCharacteristic.getProperties()),"Refresh");
             //if (!mCharacteristicUUID.contains(gattCharacteristic.getUuid().toString())){
             if (!mCharacteristicIndex.containsKey(gattCharacteristic.getUuid().toString())){
+                CharacteristicInfo info = new CharacteristicInfo(gattCharacteristic.getUuid().toString(),
+                        BTSmartUtil.getPropertiesStr(gattCharacteristic.getProperties()),"Refresh");
                 Log.d(TAG, "add UUID:" + gattCharacteristic.getUuid().toString());
                 Log.d(TAG, "add index:" + index);
                 //mCharacteristicUUID.add(gattCharacteristic.getUuid().toString());
@@ -202,7 +208,7 @@ public class GattServiceActivity extends AppCompatActivity {
                         // the value belongs to.
 
                         CharacteristicInfo info = new CharacteristicInfo(characteristicUuid.toString(),
-                                String.valueOf(properties), new String(value));
+                                BTSmartUtil.getPropertiesStr(properties), new String(value));
                         if (mCharacteristiclist.contains(info)){
                             Log.d(TAG, "UUID: " + characteristicUuid.toString());
                             Log.d(TAG, "index: " + mCharacteristicIndex.get(characteristicUuid.toString()));
@@ -258,6 +264,8 @@ public class GattServiceActivity extends AppCompatActivity {
             TextView characteristicUUIDText = (TextView) vi.findViewById(R.id.characteristic_UUID);
             TextView characteristicprpertiesText = (TextView) vi.findViewById(R.id.characteristic_prperties);
             TextView characteristicvaluesText = (TextView) vi.findViewById(R.id.characteristic_values);
+            //ImageView read_icon = (ImageView) vi.findViewById(R.id.read_action);
+           // ImageView write_icon = (ImageView) vi.findViewById(R.id.write_action);
 
             CharacteristicInfo info = (CharacteristicInfo) data.get(position);
             characteristicUUIDText.setText(info.getUUID());
@@ -274,14 +282,38 @@ public class GattServiceActivity extends AppCompatActivity {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            CharacteristicInfo info = (CharacteristicInfo)mCharacteristiclistAdapter.getItem(position);
+            final CharacteristicInfo info = (CharacteristicInfo)mCharacteristiclistAdapter.getItem(position);
             Log.d(TAG, "position = " + position);
             Log.d(TAG, "CharacteristicInfo UUID = " + info.getUUID());
             Log.d(TAG, "CharacteristicInfo Proper = " + info.getProperties());
-            for(BluetoothGattCharacteristic gattCharacteristic:mGattCharacterList){
-                if(gattCharacteristic.getUuid().toString().equals(info.getUUID())){
-                    Log.d(TAG, "start to read Characteristic");
-                    mGatt.readCharacteristic(gattCharacteristic);
+            if(info.getProperties().contains("w")){
+                AlertDialog.Builder dlg = new AlertDialog.Builder(GattServiceActivity.this);
+                final EditText devNameEdit = new EditText(GattServiceActivity.this);
+                dlg.setView(devNameEdit);
+                dlg.setTitle("请写入新值");
+                dlg.setPositiveButton("设置", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(devNameEdit.getText().toString().length() != 0) {
+                            for(BluetoothGattCharacteristic gattCharacteristic:mGattCharacterList){
+                                if(gattCharacteristic.getUuid().toString().equals(info.getUUID())){
+                                    gattCharacteristic.setValue(devNameEdit.getText().toString());
+                                    mGatt.writeCharacteristic(gattCharacteristic);
+                                }
+                            }
+                        } else {
+                            Log.d(TAG, "Please enter a value!!");
+                        }
+
+                    }
+                });
+                dlg.create();
+                dlg.show();
+            } else {
+                for(BluetoothGattCharacteristic gattCharacteristic:mGattCharacterList){
+                    if(gattCharacteristic.getUuid().toString().equals(info.getUUID())){
+                        Log.d(TAG, "start to read Characteristic");
+                        mGatt.readCharacteristic(gattCharacteristic);
+                    }
                 }
             }
         }

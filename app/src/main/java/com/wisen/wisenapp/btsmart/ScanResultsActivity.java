@@ -40,6 +40,7 @@ import com.wisen.wisenapp.R;
 import com.wisen.wisenapp.bt.DeviceListActivity;
 import com.wisen.wisenapp.bt.Saudioclient;
 import com.wisen.wisenapp.bt.Saudioserver;
+import com.wisen.wisenapp.btsmart.xiaomi.HackXiaoMiActivity;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
