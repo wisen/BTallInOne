@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -24,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -45,6 +47,11 @@ public class HackXiaoMiActivity extends AppCompatActivity {
 
     private final String TAG = "HackXiaoMi";
 
+    final byte[] green = {0x0e,0x04,0x05,0x00,0x01};
+    final byte[] red = {0x0e,0x06,0x01,0x02,0x01};
+    final byte[] blue = {0x0e,0x00,0x06,0x06,0x01};
+    final byte[] orange = {0x0e,0x06,0x02,0x00,0x01};
+
     private List<BluetoothGattCharacteristic> mGattCharacterList = null;
     private BluetoothDevice mDeviceToConnect = null;
     private ServiceInfo mServiceinfo = null;
@@ -63,6 +70,146 @@ public class HackXiaoMiActivity extends AppCompatActivity {
 
     private TextView GattServicename = null;
     private TextView GattServiceUUID = null;
+    private Button btn_write_xiaomi = null;
+    private Button btn_vib_xiaomi = null;
+    private Button btn_set_color = null;
+
+
+    //5 main xiamo services and there are UUIDs
+    private BluetoothGattService XiaoMi_S1800 = null;
+    private static final UUID XM_UUID_S1800 = UUID.fromString("00001800-0000-1000-8000-00805f9b34fb");
+    private BluetoothGattService XiaoMi_S1801 = null;
+    private static final UUID XM_UUID_S1801 = UUID.fromString("00001801-0000-1000-8000-00805f9b34fb");
+    private BluetoothGattService XiaoMi_S1802 = null;
+    private static final UUID XM_UUID_S1802 = UUID.fromString("00001802-0000-1000-8000-00805f9b34fb");
+    private BluetoothGattService XiaoMi_Sfee0 = null;
+    private static final UUID XM_UUID_Sfee0 = UUID.fromString("0000fee0-0000-1000-8000-00805f9b34fb");
+    private BluetoothGattService XiaoMi_Sfee1 = null;
+    private static final UUID XM_UUID_Sfee1 = UUID.fromString("0000fee1-0000-1000-8000-00805f9b34fb");
+    private BluetoothGattService XiaoMi_Sfee7 = null;
+    private static final UUID XM_UUID_Sfee7 = UUID.fromString("0000fee2-0000-1000-8000-00805f9b34fb");
+
+    private static final UUID UUID_DESCRIPTOR_UPDATE_NOTIFICATION	= UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+
+    //characteristic uuid list
+    private static final UUID CHARA_UUID_ff03 = UUID.fromString("0000ff03-0000-1000-8000-00805f9b34fb");
+    private static final UUID CHARA_UUID_ff07 = UUID.fromString("0000ff07-0000-1000-8000-00805f9b34fb");
+    private static final UUID CHARA_UUID_ff01 = UUID.fromString("0000ff01-0000-1000-8000-00805f9b34fb");
+    private static final UUID CHARA_UUID_ff04 = UUID.fromString("0000ff04-0000-1000-8000-00805f9b34fb");
+    final byte[] write_into_ff04_1 = {(byte)0xf0, 0x69, (byte)0xf8, 0x3a, 0x00, 0x34, (byte)0xa0, 0x3e, 0x01, 0x00, 0x00,
+            0x2d, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x59};
+    private static final UUID CHARA_UUID_ff0a = UUID.fromString("0000ff0a-0000-1000-8000-00805f9b34fb");
+    final byte[] write_into_ff0a_1 = {0x10, 0x06, 0x08, 0x0b, 0x12, 0x0b,
+            (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff};
+    //private static final UUID CHARA_UUID_ff01 = UUID.fromString("0000ff01-0000-1000-8000-00805f9b34fb");
+    private static final UUID CHARA_UUID_ff0c = UUID.fromString("0000ff0c-0000-1000-8000-00805f9b34fb");
+    private static final UUID CHARA_UUID_ff06 = UUID.fromString("0000ff06-0000-1000-8000-00805f9b34fb");
+    private static final UUID CHARA_UUID_ff09 = UUID.fromString("0000ff09-0000-1000-8000-00805f9b34fb");
+    private static final UUID CHARA_UUID_ff05 = UUID.fromString("0000ff05-0000-1000-8000-00805f9b34fb");
+    final byte[] write_into_ff05_1 = {0x05, 0x00, 0x40, 0x1f};
+    final byte[] write_into_ff05_2 = {0x04, 0x00, 0x00, 0x0f, 0x0b, 0x1f, 0x08, 0x00, 0x28, 0x00, 0x1f};
+    final byte[] write_into_ff05_3 = {0x04, 0x01, 0x00, 0x0f, 0x0b, 0x1f, 0x08, 0x00, 0x28, 0x00, 0x1f};
+    final byte[] write_into_ff05_4 = {0x04, 0x02, 0x00, 0x0f, 0x0b, 0x1f, 0x08, 0x00, 0x28, 0x00, 0x1f};
+    final byte[] write_into_ff05_5 = {0x0e, 0x00, 0x06, 0x06, 0x00};
+    final byte[] write_into_ff05_6 = {0x0f, 0x00};
+    final byte[] write_into_ff05_7 = {0x00};
+    final byte[] write_into_ff05_8 = {0x06};
+    final byte[] write_into_ff05_9 = {0x0a, 0x10, 0x06, 0x08, 0x0b, 0x12, 0x0b, 0x00, 0x00};
+    final byte[] write_into_ff05_red = {0x0e, 0x06, 0x01, 0x02, 0x01};
+    final byte[] write_into_ff05_blue = {0x0e, 0x00, 0x06, 0x06, 0x01};
+    final byte[] write_into_ff05_green = {0x0e, 0x04, 0x05, 0x00, 0x01};
+    final byte[] write_into_ff05_orange = {0x0e, 0x06, 0x02, 0x00, 0x01};
+
+    private static final UUID CHARA_UUID_ff0e = UUID.fromString("0000ff0e-0000-1000-8000-00805f9b34fb");
+    final byte[] write_into_ff0e_1 = {0x04, 0x13, (byte)0x82, 0x06, 0x03, (byte)0xce, (byte)0x86, 0x43,
+            (byte)0x9d, 0x24, 0x6c, 0x35, 0x76, 0x78, (byte)0x8a, 0x18, (byte)0x9c};
+
+    private static final UUID CHARA_UUID_ff0d = UUID.fromString("0000ff0d-0000-1000-8000-00805f9b34fb");
+
+    //service 1802
+    private static final UUID CHARA_UUID_2a06 = UUID.fromString("00002a06-0000-1000-8000-00805f9b34fb");
+    final byte[] write_into_2a06_1 = {0x03};
+
+    private enum XIAOMI_COLOR
+    {
+        RED,BLUE,ORANGE,GREEN,
+    }
+
+    private void init_hank_sequence(){
+        enable_notify(XM_UUID_Sfee0, CHARA_UUID_ff03);
+        enable_notify(XM_UUID_Sfee0, CHARA_UUID_ff07);
+
+        read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff01);
+
+        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff04, write_into_ff04_1);
+        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff0a, write_into_ff0a_1);
+
+        read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff01);
+        read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff0c);
+
+        enable_notify(XM_UUID_Sfee0, CHARA_UUID_ff0c);
+        read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff06);
+        enable_notify(XM_UUID_Sfee0, CHARA_UUID_ff06);
+        read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff09);
+
+        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_1);
+        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_2);
+        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_3);
+        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_4);
+
+        read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff01);
+
+        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_5);
+        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_6);
+        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_7);
+
+        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff0e, write_into_ff0e_1);
+
+        read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff01);
+
+        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_8);
+        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_9);
+
+        read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff0d);
+        read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff01);
+
+        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_8);
+        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_9);
+    }
+
+    private void vibration_xiaomi(){
+        write_characteristic(XM_UUID_S1802, CHARA_UUID_2a06, write_into_2a06_1);
+    }
+
+    private void set_color(XIAOMI_COLOR color){
+        switch(color){
+            case RED:
+                write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_red);
+                break;
+            case BLUE:
+                write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_blue);
+                break;
+            case ORANGE:
+                write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_orange);
+                break;
+            case GREEN:
+                write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_green);
+                break;
+            default:
+                Log.d(TAG, "wrong color!!!");
+                break;
+        }
+    }
+
+    private void delay_time(int time){
+        try{
+            Thread.currentThread();
+            Thread.sleep(time);
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,6 +238,38 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         GattServicename.setText(mServiceinfo.getName());
         GattServiceUUID = (TextView)findViewById(R.id.GattServiceUUID);
         GattServiceUUID.setText(mServiceinfo.getUUID());
+
+        btn_write_xiaomi = (Button)findViewById(R.id.btn_write_sequence);
+        btn_write_xiaomi.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                init_hank_sequence();
+            }
+        });
+
+        btn_vib_xiaomi = (Button)findViewById(R.id.btn_vib_xiaomi);
+        btn_vib_xiaomi.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                vibration_xiaomi();
+            }
+        });
+
+        btn_set_color = (Button)findViewById(R.id.btn_set_color);
+        btn_set_color.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                set_color(XIAOMI_COLOR.BLUE);
+                delay_time(2000);
+                set_color(XIAOMI_COLOR.RED);
+                delay_time(2000);
+                set_color(XIAOMI_COLOR.ORANGE);
+                delay_time(2000);
+                set_color(XIAOMI_COLOR.GREEN);
+
+
+            }
+        });
     }
 
     private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
@@ -100,7 +279,14 @@ public class HackXiaoMiActivity extends AppCompatActivity {
             if (BtSmartService.ACTION_GATT_CONNECTED.equals(action)) {
 
             } else if (BtSmartService.ACTION_GATT_DISCONNECTED.equals(action)) {
-                finish();
+                //finish();
+                /*
+                if (mBTSmartService != null) {
+                    // We have a connection to BtSmartService so now we can connect
+                    // and register the device handler.
+                    if (null != mDeviceToConnect)
+                        mBTSmartService.connectAsClient(mDeviceToConnect, null);
+                }*/
             } else if (BtSmartService.
                     ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 // Show all the supported services and characteristics on the
@@ -280,10 +466,7 @@ public class HackXiaoMiActivity extends AppCompatActivity {
      */
     private AdapterView.OnItemClickListener mCharacteristiclistClickListener = new AdapterView.OnItemClickListener() {
 
-        final byte[] green = {0x0e,0x04,0x05,0x00,0x01};
-        final byte[] red = {0x0e,0x06,0x01,0x02,0x01};
-        final byte[] blue = {0x0e,0x00,0x06,0x06,0x01};
-        final byte[] orange = {0x0e,0x06,0x02,0x00,0x01};
+
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -339,4 +522,37 @@ public class HackXiaoMiActivity extends AppCompatActivity {
             }
         }
     };
+
+    //you must ensure the characteristic_uuid include into the gatt service
+    //你必须确定gatt service包含了这个characteristic
+    private void write_characteristic(UUID service_uuid, UUID characteristic_uuid, byte[] value) {
+        if(null != mGatt) {
+            BluetoothGattCharacteristic chara = mGatt.getService(service_uuid).getCharacteristic(characteristic_uuid);
+            if(null != chara){
+                chara.setValue(value);
+                mGatt.writeCharacteristic(chara);
+            }
+        }
+    }
+
+    private void enable_notify(UUID service_uuid, UUID characteristic_uuid){
+        if(null != mGatt) {
+            BluetoothGattCharacteristic chara = mGatt.getService(service_uuid).getCharacteristic(characteristic_uuid);
+            if(null != chara){
+                BluetoothGattDescriptor descriptor = chara.getDescriptor(UUID_DESCRIPTOR_UPDATE_NOTIFICATION);
+                descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                mGatt.writeDescriptor(descriptor);
+            }
+        }
+    }
+
+    private void read_characteristic(UUID service_uuid, UUID characteristic_uuid) {
+        if(null != mGatt) {
+            BluetoothGattCharacteristic chara = mGatt.getService(service_uuid).getCharacteristic(characteristic_uuid);
+            if(null != chara){
+                mGatt.readCharacteristic(chara);
+                //Log.d(TAG, "value="+chara.getValue());
+            }
+        }
+    }
 }

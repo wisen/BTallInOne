@@ -12,8 +12,8 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Button1"
-        android:id="@+id/btn_write_config"
+        android:text="Write XiMi"
+        android:id="@+id/btn_write_sequence"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
  />
@@ -22,7 +22,7 @@
         android:id="@+id/GattServicename"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/btn_write_config"
+        android:layout_below="@+id/btn_write_sequence"
         android:textSize="32sp" />
 
     <TextView
@@ -40,6 +40,23 @@
         android:layout_below="@+id/GattServiceUUID" >
 
     </ListView>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="vibirate"
+        android:id="@+id/btn_vib_xiaomi"
+        android:layout_alignBottom="@+id/btn_write_sequence"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="color"
+        android:id="@+id/btn_set_color"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/btn_vib_xiaomi"
+        android:layout_marginStart="41dp" />
 
 
 </RelativeLayout>
