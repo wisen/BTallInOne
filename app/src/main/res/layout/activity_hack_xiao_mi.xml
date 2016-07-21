@@ -12,35 +12,11 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Write XiMi"
+        android:text="Write init"
         android:id="@+id/btn_write_sequence"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
  />
-
-    <TextView
-        android:id="@+id/GattServicename"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/btn_write_sequence"
-        android:textSize="32sp" />
-
-    <TextView
-        android:id="@+id/GattServiceUUID"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/GattServicename"
-        android:textSize="16sp" />
-
-    <ListView
-        android:id="@+id/characteristicListView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/GattServiceUUID" >
-
-    </ListView>
-
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -57,6 +33,32 @@
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/btn_vib_xiaomi"
         android:layout_marginStart="41dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="battery"
+        android:id="@+id/btn_read_battery_info"
+        android:layout_below="@+id/btn_write_sequence"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:id="@+id/battery_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_read_battery_info"
+        />
+
+    <ListView
+        android:id="@+id/characteristicListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/battery_info" >
+
+    </ListView>
+
+
 
 
 </RelativeLayout>

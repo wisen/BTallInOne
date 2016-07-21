@@ -306,7 +306,13 @@ public class ScanResultsActivity extends AppCompatActivity {
      *            The Bluetooth device the user selected.
      */
     private void startMainActivity(BluetoothDevice deviceToConnect) {
-        Intent intent = new Intent(this, BTSmartActivity.class);
+        Intent intent = null;
+        if (deviceToConnect.getName().toLowerCase().equals("mi")){
+            intent = new Intent(this, HackXiaoMiActivity.class);
+        } else {
+            intent = new Intent(this, BTSmartActivity.class);
+        }
+
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, deviceToConnect);
         this.startActivity(intent);
     }

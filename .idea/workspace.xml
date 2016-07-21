@@ -22,13 +22,10 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/2.8/taskArtifacts/fileHashes.bin" afterPath="$PROJECT_DIR$/.gradle/2.8/taskArtifacts/fileHashes.bin" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/2.8/taskArtifacts/fileSnapshots.bin" afterPath="$PROJECT_DIR$/.gradle/2.8/taskArtifacts/fileSnapshots.bin" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gradle/2.8/taskArtifacts/taskArtifacts.bin" afterPath="$PROJECT_DIR$/.gradle/2.8/taskArtifacts/taskArtifacts.bin" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/BtSmartService.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/BtSmartService.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/xiaomi/HackXiaoMiActivity.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/xiaomi/HackXiaoMiActivity.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/ScanResultsActivity.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/ScanResultsActivity.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_hack_xiao_mi.xml" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_hack_xiao_mi.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/appcompat_v7_23_1_1.xml" afterPath="$PROJECT_DIR$/.idea/libraries/appcompat_v7_23_1_1.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/design_23_1_1.xml" afterPath="$PROJECT_DIR$/.idea/libraries/design_23_1_1.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/recyclerview_v7_23_1_1.xml" afterPath="$PROJECT_DIR$/.idea/libraries/recyclerview_v7_23_1_1.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/support_annotations_23_1_1.xml" afterPath="$PROJECT_DIR$/.idea/libraries/support_annotations_23_1_1.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/support_v4_23_1_1.xml" afterPath="$PROJECT_DIR$/.idea/libraries/support_v4_23_1_1.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="WisenApp.iws" />
@@ -57,25 +54,49 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="HackXiaoMiActivity.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="HackXiaoMiActivity.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/xiaomi/HackXiaoMiActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="1.4569288">
-              <caret line="183" column="17" selection-start-line="183" selection-start-column="17" selection-end-line="183" selection-end-column="17" />
+            <state vertical-scroll-proportion="-10.25">
+              <caret line="162" column="43" selection-start-line="162" selection-start-column="43" selection-end-line="162" selection-end-column="43" />
               <folding>
-                <element signature="e#11708#11862#0" expanded="true" />
-                <element signature="e#11861#11862#0" expanded="true" />
-                <element signature="e#11976#12128#0" expanded="true" />
-                <element signature="e#12127#12128#0" expanded="true" />
-                <element signature="e#12239#12645#0" expanded="true" />
-                <element signature="e#12644#12645#0" expanded="true" />
-                <element signature="e#12713#13742#0" expanded="true" />
-                <element signature="e#13741#13742#0" expanded="true" />
-                <element signature="e#15603#15604#0" expanded="true" />
-                <element signature="e#15649#15650#0" expanded="true" />
-                <element signature="e#21849#25146#0" expanded="true" />
-                <element signature="e#25145#25146#0" expanded="true" />
+                <element signature="e#2275#2295#0" expanded="true" />
+                <element signature="e#13474#13628#0" expanded="true" />
+                <element signature="e#13627#13628#0" expanded="true" />
+                <element signature="e#13742#13894#0" expanded="true" />
+                <element signature="e#13893#13894#0" expanded="true" />
+                <element signature="e#14314#14720#0" expanded="true" />
+                <element signature="e#14719#14720#0" expanded="true" />
+                <element signature="e#14788#16874#0" expanded="true" />
+                <element signature="e#16873#16874#0" expanded="true" />
+                <element signature="e#17759#17760#0" expanded="true" />
+                <element signature="e#17805#17806#0" expanded="true" />
+                <element signature="e#25851#29148#0" expanded="true" />
+                <element signature="e#29147#29148#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="activity_hack_xiao_mi.xml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_hack_xiao_mi.xml">
+          <provider editor-type-id="android-designer">
+            <state />
+          </provider>
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-8.125">
+              <caret line="49" column="8" selection-start-line="49" selection-start-column="8" selection-end-line="49" selection-end-column="8" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CharacteristicInfo.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/CharacteristicInfo.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="5" column="13" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -84,7 +105,17 @@
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/BTSmartActivity.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="132" column="0" selection-start-line="132" selection-start-column="0" selection-end-line="132" selection-end-column="0" />
+              <caret line="72" column="44" selection-start-line="72" selection-start-column="44" selection-end-line="72" selection-end-column="44" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ScanResultsActivity.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/ScanResultsActivity.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="310" column="44" selection-start-line="310" selection-start-column="44" selection-end-line="310" selection-end-column="44" />
               <folding />
             </state>
           </provider>
@@ -103,45 +134,15 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="activity_hack_xiao_mi.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_hack_xiao_mi.xml">
-          <provider selected="true" editor-type-id="android-designer">
-            <state />
-          </provider>
-          <provider editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="14" column="32" selection-start-line="14" selection-start-column="32" selection-end-line="14" selection-end-column="32" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BtSmartService.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="BtSmartService.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/BtSmartService.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="308" column="16" selection-start-line="308" selection-start-column="16" selection-end-line="308" selection-end-column="16" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BluetoothProfile.java" pinned="false" current-in-tab="false">
-        <entry file="file://D:/Android/sdk/sources/android-23/android/bluetooth/BluetoothProfile.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="51" column="28" selection-start-line="51" selection-start-column="28" selection-end-line="51" selection-end-column="28" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="build.gradle" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/build.gradle">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-              <folding />
+            <state vertical-scroll-proportion="0.14981273">
+              <caret line="37" column="27" selection-start-line="37" selection-start-column="13" selection-end-line="37" selection-end-column="27" />
+              <folding>
+                <element signature="e#13958#13959#0" expanded="true" />
+                <element signature="e#14003#14004#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -153,128 +154,6 @@
               <caret line="136" column="13" selection-start-line="136" selection-start-column="13" selection-end-line="136" selection-end-column="13" />
               <folding>
                 <element signature="imports" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Toast.java" pinned="false" current-in-tab="false">
-        <entry file="file://D:/Android/sdk/sources/android-23/android/widget/Toast.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="163" column="16" selection-start-line="163" selection-start-column="16" selection-end-line="163" selection-end-column="16" />
-              <folding>
-                <element signature="e#5122#5123#0" expanded="true" />
-                <element signature="e#5158#5159#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ViewGroup.java" pinned="false" current-in-tab="false">
-        <entry file="file://D:/Android/sdk/sources/android-23/android/view/ViewGroup.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="6778" column="32" selection-start-line="6778" selection-start-column="32" selection-end-line="6778" selection-end-column="32" />
-              <folding>
-                <element signature="e#0#295920#0" expanded="false" />
-                <element signature="imports" expanded="false" />
-                <element signature="e#20129#20130#0" expanded="false" />
-                <element signature="e#20164#20165#0" expanded="false" />
-                <element signature="e#20224#20225#0" expanded="false" />
-                <element signature="e#20259#20260#0" expanded="false" />
-                <element signature="e#20322#20323#0" expanded="false" />
-                <element signature="e#20357#20358#0" expanded="false" />
-                <element signature="e#20414#20415#0" expanded="false" />
-                <element signature="e#20449#20450#0" expanded="false" />
-                <element signature="e#20516#20517#0" expanded="false" />
-                <element signature="e#20551#20552#0" expanded="false" />
-                <element signature="e#20599#20600#0" expanded="false" />
-                <element signature="e#20634#20635#0" expanded="false" />
-                <element signature="e#20695#20696#0" expanded="false" />
-                <element signature="e#20734#20735#0" expanded="false" />
-                <element signature="e#25715#25716#0" expanded="false" />
-                <element signature="e#25774#25775#0" expanded="false" />
-                <element signature="e#36762#36763#0" expanded="false" />
-                <element signature="e#36793#36794#0" expanded="false" />
-                <element signature="e#37254#37255#0" expanded="false" />
-                <element signature="e#37333#37334#0" expanded="false" />
-                <element signature="e#70345#70346#0" expanded="false" />
-                <element signature="e#70393#70394#0" expanded="false" />
-                <element signature="e#73445#73446#0" expanded="false" />
-                <element signature="e#73473#73474#0" expanded="false" />
-                <element signature="e#104616#104617#0" expanded="false" />
-                <element signature="e#104644#104645#0" expanded="false" />
-                <element signature="e#116312#116313#0" expanded="false" />
-                <element signature="e#116360#116361#0" expanded="false" />
-                <element signature="e#123516#123517#0" expanded="false" />
-                <element signature="e#123580#123581#0" expanded="false" />
-                <element signature="e#124790#124791#0" expanded="false" />
-                <element signature="e#124830#124831#0" expanded="false" />
-                <element signature="e#133725#133726#0" expanded="false" />
-                <element signature="e#133788#133789#0" expanded="false" />
-                <element signature="e#135504#135505#0" expanded="false" />
-                <element signature="e#135528#135529#0" expanded="false" />
-                <element signature="e#140770#140771#0" expanded="false" />
-                <element signature="e#140834#140835#0" expanded="false" />
-                <element signature="e#143224#143225#0" expanded="false" />
-                <element signature="e#143283#143284#0" expanded="false" />
-                <element signature="e#147812#147813#0" expanded="false" />
-                <element signature="e#147840#147841#0" expanded="false" />
-                <element signature="e#156324#156325#0" expanded="false" />
-                <element signature="e#156358#156359#0" expanded="false" />
-                <element signature="e#158600#158601#0" expanded="false" />
-                <element signature="e#158642#158643#0" expanded="false" />
-                <element signature="e#160313#160314#0" expanded="false" />
-                <element signature="e#160346#160347#0" expanded="false" />
-                <element signature="e#172868#172869#0" expanded="false" />
-                <element signature="e#172908#172909#0" expanded="false" />
-                <element signature="e#173501#173502#0" expanded="false" />
-                <element signature="e#173550#173551#0" expanded="false" />
-                <element signature="e#178444#178445#0" expanded="false" />
-                <element signature="e#178478#178479#0" expanded="false" />
-                <element signature="e#187367#187368#0" expanded="false" />
-                <element signature="e#187419#187420#0" expanded="false" />
-                <element signature="e#188306#188307#0" expanded="false" />
-                <element signature="e#188344#188345#0" expanded="false" />
-                <element signature="e#189319#189320#0" expanded="false" />
-                <element signature="e#189364#189365#0" expanded="false" />
-                <element signature="e#208596#208597#0" expanded="false" />
-                <element signature="e#208653#208654#0" expanded="false" />
-                <element signature="e#209270#209271#0" expanded="false" />
-                <element signature="e#209319#209320#0" expanded="false" />
-                <element signature="e#209966#209967#0" expanded="false" />
-                <element signature="e#210015#210016#0" expanded="false" />
-                <element signature="e#216694#216695#0" expanded="false" />
-                <element signature="e#216745#216746#0" expanded="false" />
-                <element signature="e#217787#217788#0" expanded="false" />
-                <element signature="e#217833#217834#0" expanded="false" />
-                <element signature="e#222391#222392#0" expanded="false" />
-                <element signature="e#222415#222416#0" expanded="false" />
-                <element signature="e#224457#224458#0" expanded="false" />
-                <element signature="e#224494#224495#0" expanded="false" />
-                <element signature="e#239608#239609#0" expanded="false" />
-                <element signature="e#239646#239647#0" expanded="false" />
-                <element signature="e#241742#241743#0" expanded="false" />
-                <element signature="e#241783#241784#0" expanded="false" />
-                <element signature="e#251780#251781#0" expanded="false" />
-                <element signature="e#251807#251808#0" expanded="false" />
-                <element signature="e#253190#253191#0" expanded="false" />
-                <element signature="e#253218#253219#0" expanded="false" />
-                <element signature="e#253718#253719#0" expanded="false" />
-                <element signature="e#253758#253759#0" expanded="false" />
-                <element signature="e#279427#279428#0" expanded="false" />
-                <element signature="e#279496#279497#0" expanded="false" />
-                <element signature="e#288007#288008#0" expanded="false" />
-                <element signature="e#288054#288055#0" expanded="false" />
-                <element signature="e#288099#288100#0" expanded="false" />
-                <element signature="e#288150#288151#0" expanded="false" />
-                <element signature="e#288198#288199#0" expanded="false" />
-                <element signature="e#288253#288254#0" expanded="false" />
-                <element signature="e#290147#290148#0" expanded="false" />
-                <element signature="e#290188#290189#0" expanded="false" />
-                <element signature="e#291438#291439#0" expanded="false" />
-                <element signature="e#291492#291493#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -1886,11 +1765,9 @@
         <option value="$PROJECT_DIR$/app/src/main/res/layout/characteristicList.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_gatt_service.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/CharacteristicInfo.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/BtSmartService.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/BTSmartUtil.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/characteristiclist.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/GattServiceActivity.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/ScanResultsActivity.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/BTSmartActivity.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/MainActivity.java" />
@@ -1898,6 +1775,8 @@
         <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_expandable_list_view_test.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/ui/UIMainActivity.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/ui/expandablelistview/ExpandableListViewTestActivity.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/ScanResultsActivity.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/BtSmartService.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_hack_xiao_mi.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/xiaomi/HackXiaoMiActivity.java" />
       </list>
@@ -2016,32 +1895,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="btsmart" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="WisenApp" />
-              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="app" />
-              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidModuleNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidSourceTypeNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="wisenapp" />
-              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidPsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="btsmart" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="xiaomi" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -2441,17 +2294,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_btsmart.xml">
-      <provider editor-type-id="android-designer">
-        <state />
-      </provider>
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-3.125">
-          <caret line="11" column="4" selection-start-line="11" selection-start-column="4" selection-end-line="24" selection-end-column="15" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_scan_results2.xml">
       <provider editor-type-id="android-designer">
         <state />
@@ -2571,14 +2413,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/CharacteristicInfo.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="5" column="13" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/bt/BTMainActivity.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -2590,13 +2424,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="11" column="13" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/ScanResultsActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="300" column="0" selection-start-line="300" selection-start-column="0" selection-end-line="300" selection-end-column="0" />
         </state>
       </provider>
     </entry>
@@ -3002,33 +2829,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_hack_xiao_mi.xml">
-      <provider selected="true" editor-type-id="android-designer">
-        <state />
-      </provider>
-      <provider editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="14" column="32" selection-start-line="14" selection-start-column="32" selection-end-line="14" selection-end-column="32" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/BtSmartService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="308" column="16" selection-start-line="308" selection-start-column="16" selection-end-line="308" selection-end-column="16" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/BTSmartActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="132" column="0" selection-start-line="132" selection-start-column="0" selection-end-line="132" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://D:/Android/sdk/sources/android-23/android/bluetooth/BluetoothGattService.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -3040,23 +2840,81 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/ScanResultsActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="310" column="44" selection-start-line="310" selection-start-column="44" selection-end-line="310" selection-end-column="44" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_btsmart.xml">
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.16334662">
+          <caret line="11" column="4" selection-start-line="11" selection-start-column="4" selection-end-line="15" selection-end-column="34" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/BTSmartActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="72" column="44" selection-start-line="72" selection-start-column="44" selection-end-line="72" selection-end-column="44" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/CharacteristicInfo.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="5" column="13" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_hack_xiao_mi.xml">
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-8.125">
+          <caret line="49" column="8" selection-start-line="49" selection-start-column="8" selection-end-line="49" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/xiaomi/HackXiaoMiActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.4569288">
-          <caret line="183" column="17" selection-start-line="183" selection-start-column="17" selection-end-line="183" selection-end-column="17" />
+        <state vertical-scroll-proportion="-10.25">
+          <caret line="162" column="43" selection-start-line="162" selection-start-column="43" selection-end-line="162" selection-end-column="43" />
           <folding>
-            <element signature="e#11708#11862#0" expanded="true" />
-            <element signature="e#11861#11862#0" expanded="true" />
-            <element signature="e#11976#12128#0" expanded="true" />
-            <element signature="e#12127#12128#0" expanded="true" />
-            <element signature="e#12239#12645#0" expanded="true" />
-            <element signature="e#12644#12645#0" expanded="true" />
-            <element signature="e#12713#13742#0" expanded="true" />
-            <element signature="e#13741#13742#0" expanded="true" />
-            <element signature="e#15603#15604#0" expanded="true" />
-            <element signature="e#15649#15650#0" expanded="true" />
-            <element signature="e#21849#25146#0" expanded="true" />
-            <element signature="e#25145#25146#0" expanded="true" />
+            <element signature="e#2275#2295#0" expanded="true" />
+            <element signature="e#13474#13628#0" expanded="true" />
+            <element signature="e#13627#13628#0" expanded="true" />
+            <element signature="e#13742#13894#0" expanded="true" />
+            <element signature="e#13893#13894#0" expanded="true" />
+            <element signature="e#14314#14720#0" expanded="true" />
+            <element signature="e#14719#14720#0" expanded="true" />
+            <element signature="e#14788#16874#0" expanded="true" />
+            <element signature="e#16873#16874#0" expanded="true" />
+            <element signature="e#17759#17760#0" expanded="true" />
+            <element signature="e#17805#17806#0" expanded="true" />
+            <element signature="e#25851#29148#0" expanded="true" />
+            <element signature="e#29147#29148#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/wisen/wisenapp/btsmart/BtSmartService.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.14981273">
+          <caret line="37" column="27" selection-start-line="37" selection-start-column="13" selection-end-line="37" selection-end-column="27" />
+          <folding>
+            <element signature="e#13958#13959#0" expanded="true" />
+            <element signature="e#14003#14004#0" expanded="true" />
           </folding>
         </state>
       </provider>

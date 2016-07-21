@@ -735,6 +735,9 @@ public class BtSmartService extends Service {
         @Override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
             BluetoothGattCharacteristic characteristic = descriptor.getCharacteristic();
+            Log.d(TAG, "onDescriptorWrite:"+descriptor.getUuid());
+            Log.d(TAG, "characteristic:"+characteristic.getUuid().toString());
+            /*
             if (currentRequest.type == BtSmartRequest.RequestType.CHARACTERISTIC_NOTIFICATION) {
                 if (status != BluetoothGatt.GATT_SUCCESS) {
                     sendMessage(currentRequest.notifyHandler, currentRequest.requestId, MESSAGE_REQUEST_FAILED);
@@ -746,6 +749,7 @@ public class BtSmartService extends Service {
                 // send message to handler.
             }
             processNextRequest();
+            */
         }
 
         @Override

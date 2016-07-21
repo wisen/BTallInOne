@@ -54,7 +54,7 @@ public class HackXiaoMiActivity extends AppCompatActivity {
 
     private List<BluetoothGattCharacteristic> mGattCharacterList = null;
     private BluetoothDevice mDeviceToConnect = null;
-    private ServiceInfo mServiceinfo = null;
+    //private ServiceInfo mServiceinfo = null;
     private BluetoothGattService mGattService = null;
     private BluetoothGatt mGatt = null;
     private BtSmartService mBTSmartService = null;
@@ -68,25 +68,27 @@ public class HackXiaoMiActivity extends AppCompatActivity {
     //private static HashSet<String> mCharacteristicUUID = new HashSet<String>();
     private static HashMap<String, Integer> mCharacteristicIndex = new HashMap<String, Integer>();
 
-    private TextView GattServicename = null;
-    private TextView GattServiceUUID = null;
+    //private TextView GattServicename = null;
+    //private TextView GattServiceUUID = null;
     private Button btn_write_xiaomi = null;
     private Button btn_vib_xiaomi = null;
     private Button btn_set_color = null;
+    private Button btn_read_battery = null;
+    private static TextView battery_info = null;
 
 
     //5 main xiamo services and there are UUIDs
-    private BluetoothGattService XiaoMi_S1800 = null;
+    //private BluetoothGattService XiaoMi_S1800 = null;
     private static final UUID XM_UUID_S1800 = UUID.fromString("00001800-0000-1000-8000-00805f9b34fb");
-    private BluetoothGattService XiaoMi_S1801 = null;
+    //private BluetoothGattService XiaoMi_S1801 = null;
     private static final UUID XM_UUID_S1801 = UUID.fromString("00001801-0000-1000-8000-00805f9b34fb");
-    private BluetoothGattService XiaoMi_S1802 = null;
+    //private BluetoothGattService XiaoMi_S1802 = null;
     private static final UUID XM_UUID_S1802 = UUID.fromString("00001802-0000-1000-8000-00805f9b34fb");
-    private BluetoothGattService XiaoMi_Sfee0 = null;
+    //private BluetoothGattService XiaoMi_Sfee0 = null;
     private static final UUID XM_UUID_Sfee0 = UUID.fromString("0000fee0-0000-1000-8000-00805f9b34fb");
-    private BluetoothGattService XiaoMi_Sfee1 = null;
+    //private BluetoothGattService XiaoMi_Sfee1 = null;
     private static final UUID XM_UUID_Sfee1 = UUID.fromString("0000fee1-0000-1000-8000-00805f9b34fb");
-    private BluetoothGattService XiaoMi_Sfee7 = null;
+    //private BluetoothGattService XiaoMi_Sfee7 = null;
     private static final UUID XM_UUID_Sfee7 = UUID.fromString("0000fee2-0000-1000-8000-00805f9b34fb");
 
     private static final UUID UUID_DESCRIPTOR_UPDATE_NOTIFICATION	= UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
@@ -103,6 +105,21 @@ public class HackXiaoMiActivity extends AppCompatActivity {
             (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff};
     //private static final UUID CHARA_UUID_ff01 = UUID.fromString("0000ff01-0000-1000-8000-00805f9b34fb");
     private static final UUID CHARA_UUID_ff0c = UUID.fromString("0000ff0c-0000-1000-8000-00805f9b34fb");
+    //一般刚连上小米或者重连的时候要读一下ff0c,以获取小米的电池的信息
+    //当小米充电完成的时候,小米手环会主动发送ff0c的Value Notification, 其中最后一位是03, 代表充电充满, 这个时候手机会震动一下, 应该是小米APP调用系统函数实现
+    //ff0c对应的是手环的电池的各种信息 data format:
+    //60 10 06 14 0b 0e 21 22 00 04
+    //60-->96 电量96%
+    //10-->16+2000=2016年
+    //06-->6+1 = 7 月
+    //14-->20=20日
+    //0b-->11=11点
+    //0e-->14=14分
+    //21-->33=33秒
+    //22-->34=充电循环次数
+    //00--> 未知, 是不是循环次数的高位?
+    //04--> 未充电的状态 02 充电ing 03 充满
+
     private static final UUID CHARA_UUID_ff06 = UUID.fromString("0000ff06-0000-1000-8000-00805f9b34fb");
     private static final UUID CHARA_UUID_ff09 = UUID.fromString("0000ff09-0000-1000-8000-00805f9b34fb");
     private static final UUID CHARA_UUID_ff05 = UUID.fromString("0000ff05-0000-1000-8000-00805f9b34fb");
@@ -136,44 +153,74 @@ public class HackXiaoMiActivity extends AppCompatActivity {
     }
 
     private void init_hank_sequence(){
+        //这里之前没有加delay_time, 出现了大量的错误:writeCharacteristic: mDeviceBusy = true, and return false
+        //后来看了sepc, spec上说了每一个request或者command都属于原子操作,同一时间只能完成一次事务,下面是原话:
+        /*An attribute protocol request and response or indication-confirmation pair is
+        considered a single transaction. A transaction shall always be performed on
+        one ATT Bearer, and shall not be split over multiple ATT Bearers.*/
+        //所以目前这种加延时的做法还是有问题, 应该做一个queue, 有request就加到queue中
+        //当当前的事务完成了,再执行下一个事务的request
+        //那么后面的任务就很明确了, 做一个queue, 添加事务完成的确认
         enable_notify(XM_UUID_Sfee0, CHARA_UUID_ff03);
+        delay_time(100);
         enable_notify(XM_UUID_Sfee0, CHARA_UUID_ff07);
-
+        delay_time(100);
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff01);
-
+        delay_time(100);
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff04, write_into_ff04_1);
+        delay_time(100);
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff0a, write_into_ff0a_1);
-
+        delay_time(100);
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff01);
+        delay_time(100);
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff0c);
-
+        delay_time(100);
         enable_notify(XM_UUID_Sfee0, CHARA_UUID_ff0c);
+        delay_time(100);
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff06);
+        delay_time(100);
         enable_notify(XM_UUID_Sfee0, CHARA_UUID_ff06);
+        delay_time(100);
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff09);
+        delay_time(100);
 
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_1);
+        delay_time(100);
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_2);
+        delay_time(100);
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_3);
+        delay_time(100);
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_4);
+        delay_time(100);
 
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff01);
+        delay_time(100);
 
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_5);
+        delay_time(100);
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_6);
+        delay_time(100);
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_7);
+        delay_time(100);
 
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff0e, write_into_ff0e_1);
+        delay_time(100);
 
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff01);
+        delay_time(100);
 
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_8);
+        delay_time(100);
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_9);
+        delay_time(100);
 
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff0d);
+        delay_time(100);
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff01);
+        delay_time(100);
 
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_8);
+        delay_time(100);
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_9);
     }
 
@@ -220,10 +267,10 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         Intent intent = getIntent();
         mDeviceToConnect = intent.getExtras().getParcelable(BluetoothDevice.EXTRA_DEVICE);
         Log.d(TAG, "device name=" + mDeviceToConnect.getName());
-        mServiceinfo = (ServiceInfo)intent.getParcelableExtra(ServiceInfo.ServiceInfoKeyString);
+        //mServiceinfo = (ServiceInfo)intent.getParcelableExtra(ServiceInfo.ServiceInfoKeyString);
         //mGattService = mServiceinfo.getService();
-        Log.d(TAG,"name="+mServiceinfo.getName());
-        Log.d(TAG,"uuid="+mServiceinfo.getUUID());
+        //Log.d(TAG,"name="+mServiceinfo.getName());
+        //Log.d(TAG,"uuid="+mServiceinfo.getUUID());
 
         // Make a connection to BtSmartService to enable us to use its services.
         Intent bindIntent = new Intent(this, BtSmartService.class);
@@ -234,10 +281,10 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         mCharacteristiclistView.setAdapter(mCharacteristiclistAdapter);
         mCharacteristiclistView.setOnItemClickListener(mCharacteristiclistClickListener);
 
-        GattServicename = (TextView)findViewById(R.id.GattServicename);
-        GattServicename.setText(mServiceinfo.getName());
-        GattServiceUUID = (TextView)findViewById(R.id.GattServiceUUID);
-        GattServiceUUID.setText(mServiceinfo.getUUID());
+        //GattServicename = (TextView)findViewById(R.id.GattServicename);
+        //GattServicename.setText(mServiceinfo.getName());
+        //GattServiceUUID = (TextView)findViewById(R.id.GattServiceUUID);
+        //GattServiceUUID.setText(mServiceinfo.getUUID());
 
         btn_write_xiaomi = (Button)findViewById(R.id.btn_write_sequence);
         btn_write_xiaomi.setOnClickListener(new View.OnClickListener() {
@@ -252,6 +299,16 @@ public class HackXiaoMiActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 vibration_xiaomi();
+            }
+        });
+
+        battery_info = (TextView)findViewById(R.id.battery_info);
+
+        btn_read_battery = (Button)findViewById(R.id.btn_read_battery_info);
+        btn_read_battery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
             }
         });
 
@@ -277,7 +334,25 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (BtSmartService.ACTION_GATT_CONNECTED.equals(action)) {
-
+                mGatt = mBTSmartService.get_Gatt();
+                mGattServiceList = mBTSmartService.get_GattServiceList();
+                mBTSmartService.registerGattServiceHandler(mGattServiceHandler);
+                if(null != mGatt && null != mGattServiceList) {
+                    for(BluetoothGattService gattService:mGattServiceList){
+                        if (gattService.getUuid().equals(XM_UUID_Sfee0)){
+                            mGattCharacterList = gattService.getCharacteristics();
+                            if (null != mGattCharacterList) {
+                                //fill data into adapter
+                                fill_data_into_adapter(mGattCharacterList);
+                            } else {
+                                Log.e(TAG, "get BluetoothGattCharacteristic list fail!!");
+                            }
+                            break;
+                        }
+                    }
+                } else {
+                    Log.e(TAG, "get_Gatt or get_GattServiceList fail!!!");
+                }
             } else if (BtSmartService.ACTION_GATT_DISCONNECTED.equals(action)) {
                 //finish();
                 /*
@@ -299,7 +374,8 @@ public class HackXiaoMiActivity extends AppCompatActivity {
     public void onDestroy() {
         unregisterReceiver(mGattUpdateReceiver);
         Toast.makeText(this, "Disconnected from device:" + mDeviceToConnect.getName(), Toast.LENGTH_LONG).show();
-        mGatt.close();
+        if (null != mGatt)
+            mGatt.close();
         if(null != mBTSmartService){
             mBTSmartService.disconnect();
         }
@@ -311,27 +387,7 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName className, IBinder rawBinder) {
             mBTSmartService = ((BtSmartService.LocalBinder) rawBinder).getService();
             if (mBTSmartService != null) {
-                mGatt = mBTSmartService.get_Gatt();
-                mGattServiceList = mBTSmartService.get_GattServiceList();
-                mBTSmartService.registerGattServiceHandler(mGattServiceHandler);
-                if(null != mGatt && null != mGattServiceList) {
-                    for(BluetoothGattService gattService:mGattServiceList){
-                        if (gattService.getUuid().toString().equals(mServiceinfo.getUUID())){
-                            mGattCharacterList = gattService.getCharacteristics();
-                            if (null != mGattCharacterList) {
-                                //fill data into adapter
-                                fill_data_into_adapter(mGattCharacterList);
-                            } else {
-                                Log.e(TAG, "get BluetoothGattCharacteristic list fail!!");
-                            }
-
-                            break;
-                        }
-                    }
-                } else {
-                    Log.e(TAG, "get_Gatt or get_GattServiceList fail!!!");
-                }
-
+                mBTSmartService.connectAsClient(mDeviceToConnect, null);
             }
         }
 
@@ -390,9 +446,43 @@ public class HackXiaoMiActivity extends AppCompatActivity {
                         byte[] value = msgExtra.getByteArray(BtSmartService.EXTRA_VALUE);
                         int properties = msgExtra.getInt(BtSmartService.EXTRA_PROPERTIES, 0);
 
+                        if(CHARA_UUID_ff0c.equals(characteristicUuid)){
+                            if(value.length == 10){
+                                String str = "";
+                                int year = value[1] + 2000;
+                                int month = value[2] + 1;
+                                int day = value[3];
+                                int hour = value[4];
+                                int mini = value[5];
+                                int seconds = value[6];
+                                String status = "unknown";
+                                switch (value[9]){
+                                    case 1:
+                                        status = "Low";
+                                        break;
+                                    case 2:
+                                        status = "Charging...";
+                                        break;
+                                    case 3:
+                                        status = "Full";
+                                        break;
+                                    case 4:
+                                        status = "UnCharge";
+                                        break;
+                                }
+                                str += "Battery percent:"+value[0]+"%\n";
+                                str += "Last changed time:"+year+"-"+month+"-"+day+" "
+                                    +hour+":"+mini+":"+seconds+"\n";
+                                str += "Change "+value[7]+" times\n";
+                                str += "Current status:"+status;
+                                battery_info.setText(str);
+                            } else {
+                                Log.d(TAG, "battery data format error!");
+                            }
+                        }
                         // and characteristicUuid tell you which characteristic
                         // the value belongs to.
-
+/*
                         CharacteristicInfo info = new CharacteristicInfo(characteristicUuid.toString(),
                                 BTSmartUtil.getPropertiesStr(properties), new String(value));
                         if (mCharacteristiclist.contains(info)){
@@ -402,7 +492,7 @@ public class HackXiaoMiActivity extends AppCompatActivity {
                             Log.d(TAG, "size: " + mCharacteristiclist.size());
                             mCharacteristiclistAdapter.notifyDataSetChanged();
                         }
-
+*/
                         break;
                     }
                     case BtSmartService.MESSAGE_DISCONNECTED: {
