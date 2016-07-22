@@ -732,8 +732,7 @@ public class BtSmartService extends Service {
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-
-            Log.e(TAG, "onCharacteristicChanged: "+characteristic.getUuid());
+            Log.e(TAG, "onCharacteristicChanged: " + characteristic.getUuid());
             if(null != mGattServiceHandler){
                 Bundle messageBundle = new Bundle();
                 Message msg = Message.obtain(mGattServiceHandler, MESSAGE_CHARACTERISTIC_CHANGE);
@@ -751,49 +750,20 @@ public class BtSmartService extends Service {
          */
         @Override
         public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
-            BluetoothGattCharacteristic characteristic = descriptor.getCharacteristic();
-            if (currentRequest.type == BtSmartRequest.RequestType.CHARACTERISTIC_NOTIFICATION) {
-                // Descriptor was not requested indirectly as part of
-                // registration for notifications.
-                if (status != BluetoothGatt.GATT_SUCCESS) {
-                    sendMessage(currentRequest.notifyHandler, currentRequest.requestId, MESSAGE_REQUEST_FAILED);
-                    mNotificationHandlers
-                            .removeHandler(characteristic.getService().getUuid(), characteristic.getUuid());
-                }
-                if (characteristic.getService().getUuid() == mPendingCharacteristic.getService().getUuid()
-                        && characteristic.getUuid() == mPendingCharacteristic.getUuid()) {
-                    mNotificationHandlers.addHandler(characteristic.getService().getUuid(), characteristic.getUuid(),
-                            currentRequest.notifyHandler);
-                    if (!enableNotification(true, characteristic)) {
-                        sendMessage(currentRequest.notifyHandler, currentRequest.requestId, MESSAGE_REQUEST_FAILED);
-                        mNotificationHandlers.removeHandler(characteristic.getService().getUuid(),
-                                characteristic.getUuid());
-                    }
-                    // Don't call processNextRequest yet as this request isn't
-                    // complete until onDescriptorWrite() triggers.
-                }
-            } else if (currentRequest.type == BtSmartRequest.RequestType.READ_DESCRIPTOR) {
-                // Descriptor was requested directly.
-                if (status == BluetoothGatt.GATT_SUCCESS) {
-                    Bundle messageBundle = new Bundle();
-                    Message msg = Message.obtain(currentRequest.notifyHandler, MESSAGE_DESCRIPTOR_VALUE);
-                    messageBundle.putByteArray(EXTRA_VALUE, characteristic.getValue());
-                    messageBundle.putParcelable(EXTRA_SERVICE_UUID,
-                            BtSmartUuid.get(characteristic.getService().getUuid()).getParcelable());
-                    messageBundle.putParcelable(EXTRA_CHARACTERISTIC_UUID, BtSmartUuid.get(characteristic.getUuid())
-                            .getParcelable());
-                    messageBundle.putParcelable(EXTRA_DESCRIPTOR_UUID, BtSmartUuid.get(descriptor.getUuid())
-                            .getParcelable());
-                    msg.setData(messageBundle);
-                    msg.sendToTarget();
-                } else {
-                    sendMessage(currentRequest.notifyHandler, currentRequest.requestId, MESSAGE_REQUEST_FAILED);
-                }
-                // This request is now complete, so see if there is another.
-                processNextRequest();
-            }
+            Log.e(TAG, "onDescriptorRead: "+descriptor.getUuid());
         }
 
+        public void onReliableWriteCompleted(BluetoothGatt gatt, int status) {
+            Log.e(TAG, "onReliableWriteCompleted: ");
+        }
+
+        public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
+            Log.e(TAG, "onReadRemoteRssi: ");
+        }
+
+        public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
+            Log.e(TAG, "onMtuChanged: ");
+        }
         /**
          * After writing the CCC for a notification this callback should trigger. It could also be called when a
          * descriptor write was requested directly, so that case is handled too.
@@ -1141,6 +1111,8 @@ public class BtSmartService extends Service {
         if (serviceObject != null) {
             BluetoothGattCharacteristic characteristicObject = serviceObject.getCharacteristic(characteristic);
             if (characteristicObject != null) {
+                //this method is vary important, or you will never get the onCharacteristicChanged event.
+                mGattClient.setCharacteristicNotification(characteristicObject, true);
                 BluetoothGattDescriptor descriptor = characteristicObject.getDescriptor(description);
                 if(null != descriptor) {
                     Log.d(TAG, "performWriteDescriptionRequest: ");

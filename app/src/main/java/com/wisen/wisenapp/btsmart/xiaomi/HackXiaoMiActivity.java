@@ -76,6 +76,7 @@ public class HackXiaoMiActivity extends AppCompatActivity {
     private Button btn_set_color = null;
     private Button btn_read_battery = null;
     private Button btn_vib_test2 = null;
+    private Button btn_read_firmware_version = null;
     private static TextView battery_info = null;
 
 
@@ -182,10 +183,6 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff01);
         //delay_time(100);
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff0c);
-    }
-
-    //called after recive the ff03 report 0x15
-    private void init_hank_sequence2(){
         //delay_time(100);
         enable_notify(XM_UUID_Sfee0, CHARA_UUID_ff0c);
         //delay_time(100);
@@ -195,6 +192,10 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         //delay_time(100);
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff09);
         //delay_time(100);
+    }
+
+    //called after recive the ff03 report 0x15
+    private void init_hank_sequence2(){
 
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_1);
         //delay_time(100);
@@ -400,6 +401,25 @@ public class HackXiaoMiActivity extends AppCompatActivity {
                 }
             }
         });
+        btn_read_firmware_version = (Button)findViewById(R.id.btn_read_firmware_version);
+        btn_read_firmware_version.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (null != mBTSmartService){
+                    if(mBTSmartService.get_BtSmartState() == BtSmartService.BtSmartStateTYPE.BT_SMART_STATE_DISCONNECTED){
+                        if (null != mBTSmartService){
+                            mTitle.setText("Begin to reconn Gatt");
+                            Log.e(TAG, "GATT service disconnected, state="+mBTSmartService.get_BtSmartState());
+                            reconnectGatt();
+                        }
+                    } else if(mBTSmartService.get_BtSmartState() == BtSmartService.BtSmartStateTYPE.BT_SMART_STATE_CONNECTED){
+                        read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff01);
+                    }
+                } else {
+                    mTitle.setText("SmartSer not Conn");
+                }
+            }
+        });
 
         btn_set_color = (Button)findViewById(R.id.btn_set_color);
         btn_set_color.setOnClickListener(new View.OnClickListener() {
@@ -599,6 +619,21 @@ public class HackXiaoMiActivity extends AppCompatActivity {
                             } else {
                                 Log.d(TAG, "battery data format error!");
                             }
+                        } else if(CHARA_UUID_ff01.equals(characteristicUuid)){
+                            if(value.length == 16){
+                                String str = "";
+                                str += "XiaoMI firmware version:\n";
+                                str += value[15];
+                                str += ".";
+                                str += value[14];
+                                str += ".";
+                                str += value[13];
+                                str += ".";
+                                str += value[12];
+                                battery_info.setText(str);
+                            } else {
+                                Log.d(TAG, "firmware version format error!");
+                            }
                         }
                         // and characteristicUuid tell you which characteristic
                         // the value belongs to.
@@ -631,10 +666,12 @@ public class HackXiaoMiActivity extends AppCompatActivity {
                                 .getParcelable(BtSmartService.EXTRA_CHARACTERISTIC_UUID)).getUuid();
                         byte[] value = msgExtra.getByteArray(BtSmartService.EXTRA_VALUE);
                         Log.d(TAG, "value = " + value[0]);
-                        if(characteristicUuid == CHARA_UUID_ff03 && value[0] == 0x15){
+                        if(characteristicUuid.equals(CHARA_UUID_ff03) && value[0] == 0x15){
                             Log.d(TAG, "now we can start init_hank_sequence2...");
                             parentActivity.init_hank_sequence2();
-                        } else {
+                        } else if (characteristicUuid.equals(CHARA_UUID_ff06)){
+                            battery_info.setText("Steps: " + value[0]);
+                        }else {
                             Log.d(TAG, "Notification: " + characteristicUuid + " "+value[0]);
                         }
                         break;
