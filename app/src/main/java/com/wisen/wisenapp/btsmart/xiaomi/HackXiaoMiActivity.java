@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -74,6 +75,7 @@ public class HackXiaoMiActivity extends AppCompatActivity {
     private Button btn_vib_xiaomi = null;
     private Button btn_set_color = null;
     private Button btn_read_battery = null;
+    private Button btn_vib_test2 = null;
     private static TextView battery_info = null;
 
 
@@ -129,20 +131,26 @@ public class HackXiaoMiActivity extends AppCompatActivity {
     final byte[] write_into_ff05_4 = {0x04, 0x02, 0x00, 0x0f, 0x0b, 0x1f, 0x08, 0x00, 0x28, 0x00, 0x1f};
     final byte[] write_into_ff05_5 = {0x0e, 0x00, 0x06, 0x06, 0x00};
     final byte[] write_into_ff05_6 = {0x0f, 0x00};
-    final byte[] write_into_ff05_7 = {0x00};
+    //final byte[] write_into_ff05_7 = {0x00};
     final byte[] write_into_ff05_8 = {0x06};
     final byte[] write_into_ff05_9 = {0x0a, 0x10, 0x06, 0x08, 0x0b, 0x12, 0x0b, 0x00, 0x00};
     final byte[] write_into_ff05_red = {0x0e, 0x06, 0x01, 0x02, 0x01};
     final byte[] write_into_ff05_blue = {0x0e, 0x00, 0x06, 0x06, 0x01};
     final byte[] write_into_ff05_green = {0x0e, 0x04, 0x05, 0x00, 0x01};
     final byte[] write_into_ff05_orange = {0x0e, 0x06, 0x02, 0x00, 0x01};
+    final byte[] write_into_ff05_vib_with_led = {0x08, 0x00};
+    final byte[] write_into_ff05_vib_until_stop = {0x08, 0x01};
+    final byte[] write_into_ff05_vib_without_led = {0x08, 0x03};
+    final byte[] write_into_ff05_vib_stop = {0x19};
+
+    private static final UUID CHARA_UUID_ff02 = UUID.fromString("0000ff02-0000-1000-8000-00805f9b34fb");
+    final byte[] write_into_ff02_1 = {0x00};
 
     private static final UUID CHARA_UUID_ff0e = UUID.fromString("0000ff0e-0000-1000-8000-00805f9b34fb");
-    final byte[] write_into_ff0e_1 = {0x04, 0x13, (byte)0x82, 0x06, 0x03, (byte)0xce, (byte)0x86, 0x43,
-            (byte)0x9d, 0x24, 0x6c, 0x35, 0x76, 0x78, (byte)0x8a, 0x18, (byte)0x9c};
 
     private static final UUID CHARA_UUID_ff0d = UUID.fromString("0000ff0d-0000-1000-8000-00805f9b34fb");
-
+    final byte[] write_into_ff0d_1 = {0x04, 0x13, (byte)0x82, 0x06, 0x03, (byte)0xce, (byte)0x86, 0x43,
+            (byte)0x9d, 0x24, 0x6c, 0x35, 0x76, 0x78, (byte)0x8a, 0x18, (byte)0x9c};
     //service 1802
     private static final UUID CHARA_UUID_2a06 = UUID.fromString("00002a06-0000-1000-8000-00805f9b34fb");
     final byte[] write_into_2a06_1 = {0x03};
@@ -162,70 +170,87 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         //当当前的事务完成了,再执行下一个事务的request
         //那么后面的任务就很明确了, 做一个queue, 添加事务完成的确认
         enable_notify(XM_UUID_Sfee0, CHARA_UUID_ff03);
-        delay_time(100);
+        //delay_time(100);
         enable_notify(XM_UUID_Sfee0, CHARA_UUID_ff07);
-        delay_time(100);
+        //delay_time(100);
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff01);
-        delay_time(100);
+        //delay_time(100);
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff04, write_into_ff04_1);
-        delay_time(100);
+        //delay_time(100);
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff0a, write_into_ff0a_1);
-        delay_time(100);
+        //delay_time(100);
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff01);
-        delay_time(100);
+        //delay_time(100);
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff0c);
-        delay_time(100);
+    }
+
+    //called after recive the ff03 report 0x15
+    private void init_hank_sequence2(){
+        //delay_time(100);
         enable_notify(XM_UUID_Sfee0, CHARA_UUID_ff0c);
-        delay_time(100);
+        //delay_time(100);
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff06);
-        delay_time(100);
+        // delay_time(100);
         enable_notify(XM_UUID_Sfee0, CHARA_UUID_ff06);
-        delay_time(100);
+        //delay_time(100);
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff09);
-        delay_time(100);
+        //delay_time(100);
 
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_1);
-        delay_time(100);
+        //delay_time(100);
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_2);
-        delay_time(100);
+        //delay_time(100);
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_3);
-        delay_time(100);
+        //delay_time(100);
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_4);
-        delay_time(100);
+        //delay_time(100);
 
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff01);
-        delay_time(100);
+        //delay_time(100);
 
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_5);
-        delay_time(100);
+        //delay_time(100);
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_6);
-        delay_time(100);
-        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_7);
-        delay_time(100);
+        //delay_time(100);
+        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff02, write_into_ff02_1);
+        //delay_time(100);
 
-        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff0e, write_into_ff0e_1);
-        delay_time(100);
+        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff0d, write_into_ff0d_1);
+        //delay_time(100);
 
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff01);
-        delay_time(100);
+        //delay_time(100);
 
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_8);
-        delay_time(100);
+        //delay_time(100);
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_9);
-        delay_time(100);
+        //delay_time(100);
 
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff0d);
-        delay_time(100);
+        //delay_time(100);
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff01);
-        delay_time(100);
+        //delay_time(100);
 
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_8);
-        delay_time(100);
+        //delay_time(100);
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_9);
     }
 
     private void vibration_xiaomi(){
+        Log.d(TAG, "vibration_xiaomi");
         write_characteristic(XM_UUID_S1802, CHARA_UUID_2a06, write_into_2a06_1);
+    }
+
+
+    private boolean vib_xiaomi_test2_flag = true;
+    private void vib_xiaomi_test2(){
+        if(!vib_xiaomi_test2_flag){
+            write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_vib_stop);
+            vib_xiaomi_test2_flag = true;
+        } else {
+            write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_vib_until_stop);
+            vib_xiaomi_test2_flag = false;
+        }
     }
 
     private void set_color(XIAOMI_COLOR color){
@@ -257,10 +282,18 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         }
     }
 
+    private TextView mTitle = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.CustomTheme);
+        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hack_xiao_mi);
+        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
+
+        mTitle = (TextView) findViewById(R.id.title_left_text);
+        mTitle.setText(TAG);
+        mTitle = (TextView) findViewById(R.id.title_right_text);
 
         registerReceiver(mGattUpdateReceiver, BTSmartUtil.getmAdapterIntentFilter());
 
@@ -290,7 +323,39 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         btn_write_xiaomi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                init_hank_sequence();
+                if (null != mBTSmartService){
+                    if(mBTSmartService.get_BtSmartState() == BtSmartService.BtSmartStateTYPE.BT_SMART_STATE_DISCONNECTED){
+                        if (null != mBTSmartService){
+                            mTitle.setText("Begin to reconn Gatt");
+                            Log.e(TAG, "GATT service disconnected, state="+mBTSmartService.get_BtSmartState());
+                            reconnectGatt();
+                        }
+                    } else if(mBTSmartService.get_BtSmartState() == BtSmartService.BtSmartStateTYPE.BT_SMART_STATE_CONNECTED){
+                        init_hank_sequence();
+                    }
+                } else {
+                    mTitle.setText("SmartSer not Conn");
+                }
+            }
+        });
+
+        btn_vib_test2 = (Button)findViewById(R.id.btn_vib_test2);
+        btn_vib_test2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (null != mBTSmartService){
+                    if(mBTSmartService.get_BtSmartState() == BtSmartService.BtSmartStateTYPE.BT_SMART_STATE_DISCONNECTED){
+                        if (null != mBTSmartService){
+                            mTitle.setText("Begin to reconn Gatt");
+                            Log.e(TAG, "GATT service disconnected, state="+mBTSmartService.get_BtSmartState());
+                            reconnectGatt();
+                        }
+                    } else if(mBTSmartService.get_BtSmartState() == BtSmartService.BtSmartStateTYPE.BT_SMART_STATE_CONNECTED){
+                        vib_xiaomi_test2();
+                    }
+                } else {
+                    mTitle.setText("SmartSer not Conn");
+                }
             }
         });
 
@@ -298,7 +363,19 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         btn_vib_xiaomi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                vibration_xiaomi();
+                if (null != mBTSmartService){
+                    if(mBTSmartService.get_BtSmartState() == BtSmartService.BtSmartStateTYPE.BT_SMART_STATE_DISCONNECTED){
+                        if (null != mBTSmartService){
+                            mTitle.setText("Begin to reconn Gatt");
+                            Log.e(TAG, "GATT service disconnected, state="+mBTSmartService.get_BtSmartState());
+                            reconnectGatt();
+                        }
+                    } else if(mBTSmartService.get_BtSmartState() == BtSmartService.BtSmartStateTYPE.BT_SMART_STATE_CONNECTED){
+                        vibration_xiaomi();
+                    }
+                } else {
+                    mTitle.setText("SmartSer not Conn");
+                }
             }
         });
 
@@ -308,7 +385,19 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         btn_read_battery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                if (null != mBTSmartService){
+                    if(mBTSmartService.get_BtSmartState() == BtSmartService.BtSmartStateTYPE.BT_SMART_STATE_DISCONNECTED){
+                        if (null != mBTSmartService){
+                            mTitle.setText("Begin to reconn Gatt");
+                            Log.e(TAG, "GATT service disconnected, state="+mBTSmartService.get_BtSmartState());
+                            reconnectGatt();
+                        }
+                    } else if(mBTSmartService.get_BtSmartState() == BtSmartService.BtSmartStateTYPE.BT_SMART_STATE_CONNECTED){
+                        read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff0c);
+                    }
+                } else {
+                    mTitle.setText("SmartSer not Conn");
+                }
             }
         });
 
@@ -316,15 +405,25 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         btn_set_color.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                set_color(XIAOMI_COLOR.BLUE);
-                delay_time(2000);
-                set_color(XIAOMI_COLOR.RED);
-                delay_time(2000);
-                set_color(XIAOMI_COLOR.ORANGE);
-                delay_time(2000);
-                set_color(XIAOMI_COLOR.GREEN);
-
-
+                if (null != mBTSmartService){
+                    if(mBTSmartService.get_BtSmartState() == BtSmartService.BtSmartStateTYPE.BT_SMART_STATE_DISCONNECTED){
+                        if (null != mBTSmartService){
+                            mTitle.setText("Begin to reconn Gatt");
+                            Log.e(TAG, "GATT service disconnected, state="+mBTSmartService.get_BtSmartState());
+                            reconnectGatt();
+                        }
+                    } else if(mBTSmartService.get_BtSmartState() == BtSmartService.BtSmartStateTYPE.BT_SMART_STATE_CONNECTED){
+                        set_color(XIAOMI_COLOR.BLUE);
+                        delay_time(2000);
+                        set_color(XIAOMI_COLOR.RED);
+                        delay_time(2000);
+                        set_color(XIAOMI_COLOR.ORANGE);
+                        delay_time(2000);
+                        set_color(XIAOMI_COLOR.GREEN);
+                    }
+                } else {
+                    mTitle.setText("SmartSer not Conn");
+                }
             }
         });
     }
@@ -334,6 +433,7 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (BtSmartService.ACTION_GATT_CONNECTED.equals(action)) {
+                mTitle.setText("Gatt Connected");
                 mGatt = mBTSmartService.get_Gatt();
                 mGattServiceList = mBTSmartService.get_GattServiceList();
                 mBTSmartService.registerGattServiceHandler(mGattServiceHandler);
@@ -354,14 +454,8 @@ public class HackXiaoMiActivity extends AppCompatActivity {
                     Log.e(TAG, "get_Gatt or get_GattServiceList fail!!!");
                 }
             } else if (BtSmartService.ACTION_GATT_DISCONNECTED.equals(action)) {
-                //finish();
-                /*
-                if (mBTSmartService != null) {
-                    // We have a connection to BtSmartService so now we can connect
-                    // and register the device handler.
-                    if (null != mDeviceToConnect)
-                        mBTSmartService.connectAsClient(mDeviceToConnect, null);
-                }*/
+                //Log.e(TAG, "GATT service disconnected, reconnect it!!");
+                mTitle.setText("Gatt DisConnected");
             } else if (BtSmartService.
                     ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 // Show all the supported services and characteristics on the
@@ -370,6 +464,21 @@ public class HackXiaoMiActivity extends AppCompatActivity {
             }
         }
     };
+
+    private void reconnectGatt(){
+        Log.e(TAG, "begin to reconnect Gatt.");
+        mGattCharacterList = null;
+        mGattServiceList = null;
+        mCharacteristiclist.clear();
+        mCharacteristicIndex.clear();
+        index=0;
+        mCharacteristiclistAdapter.notifyDataSetChanged();
+        if (null != mBTSmartService){
+            if (null != mDeviceToConnect){
+                mBTSmartService.connectAsClient(mDeviceToConnect, null);
+            }
+        }
+    }
 
     public void onDestroy() {
         unregisterReceiver(mGattUpdateReceiver);
@@ -383,6 +492,19 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.e(TAG, "onResume");
+        if(null != mBTSmartService && mBTSmartService.get_BtSmartState() == BtSmartService.BtSmartStateTYPE.BT_SMART_STATE_DISCONNECTED){
+            mTitle.setText("BTSMartService DisConnected");
+            if (null != mBTSmartService){
+                Log.e(TAG, "GATT service disconnected, state="+mBTSmartService.get_BtSmartState());
+                reconnectGatt();
+            }
+        }
+    }
+
     private ServiceConnection mBTSmartServiceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder rawBinder) {
             mBTSmartService = ((BtSmartService.LocalBinder) rawBinder).getService();
@@ -392,6 +514,7 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         }
 
         public void onServiceDisconnected(ComponentName classname) {
+            Log.e(TAG, "onServiceDisconnected");
             mBTSmartService = null;
         }
     };
@@ -418,6 +541,7 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         return true;
     }
 
+
     private final GattServiceHandler mGattServiceHandler = new GattServiceHandler(this);
 
     private static class GattServiceHandler extends Handler {
@@ -436,11 +560,7 @@ public class HackXiaoMiActivity extends AppCompatActivity {
                 Log.d(TAG, "handleMessage:" + msg.what);
                 switch (msg.what) {
                     case BtSmartService.MESSAGE_CHARACTERISTIC_VALUE: {
-                        // This code is executed when a value is received in
-                        // response to a direct get or a notification.
                         Bundle msgExtra = msg.getData();
-                        //UUID serviceUuid = ((ParcelUuid) msgExtra.getParcelable(BtSmartService.EXTRA_SERVICE_UUID))
-                        //        .getUuid();
                         UUID characteristicUuid = ((ParcelUuid) msgExtra
                                 .getParcelable(BtSmartService.EXTRA_CHARACTERISTIC_UUID)).getUuid();
                         byte[] value = msgExtra.getByteArray(BtSmartService.EXTRA_VALUE);
@@ -497,7 +617,26 @@ public class HackXiaoMiActivity extends AppCompatActivity {
                     }
                     case BtSmartService.MESSAGE_DISCONNECTED: {
                         // End this activity and go back to scan results view.
-                        parentActivity.finish();
+                        //parentActivity.finish();
+                        break;
+                    }
+                    case BtSmartService.MESSAGE_REQUEST_FAILED: {
+                        Log.d(TAG, "request failed!!!");
+                        break;
+                    }
+                    case BtSmartService.MESSAGE_CHARACTERISTIC_CHANGE:{
+                        Log.d(TAG, "MESSAGE_CHARACTERISTIC_CHANGE");
+                        Bundle msgExtra = msg.getData();
+                        UUID characteristicUuid = ((ParcelUuid) msgExtra
+                                .getParcelable(BtSmartService.EXTRA_CHARACTERISTIC_UUID)).getUuid();
+                        byte[] value = msgExtra.getByteArray(BtSmartService.EXTRA_VALUE);
+                        Log.d(TAG, "value = " + value[0]);
+                        if(characteristicUuid == CHARA_UUID_ff03 && value[0] == 0x15){
+                            Log.d(TAG, "now we can start init_hank_sequence2...");
+                            parentActivity.init_hank_sequence2();
+                        } else {
+                            Log.d(TAG, "Notification: " + characteristicUuid + " "+value[0]);
+                        }
                         break;
                     }
                 }
@@ -616,33 +755,44 @@ public class HackXiaoMiActivity extends AppCompatActivity {
     //you must ensure the characteristic_uuid include into the gatt service
     //你必须确定gatt service包含了这个characteristic
     private void write_characteristic(UUID service_uuid, UUID characteristic_uuid, byte[] value) {
-        if(null != mGatt) {
+        if(null != mGatt && null != mBTSmartService) {
+            Log.d(TAG, "write_characteristic:"+" "+ service_uuid + " "+characteristic_uuid);
+            mBTSmartService.requestCharacteristicWrite(1, service_uuid, characteristic_uuid, value, mGattServiceHandler);
+            /*
             BluetoothGattCharacteristic chara = mGatt.getService(service_uuid).getCharacteristic(characteristic_uuid);
             if(null != chara){
                 chara.setValue(value);
                 mGatt.writeCharacteristic(chara);
             }
+            */
         }
     }
 
     private void enable_notify(UUID service_uuid, UUID characteristic_uuid){
-        if(null != mGatt) {
+        if(null != mGatt && null != mBTSmartService) {
+            Log.d(TAG, "enable_notify:"+" "+service_uuid+" "+characteristic_uuid+" "+UUID_DESCRIPTOR_UPDATE_NOTIFICATION);
+            mBTSmartService.requestDescriptionWrite(2, service_uuid, characteristic_uuid, UUID_DESCRIPTOR_UPDATE_NOTIFICATION, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE, mGattServiceHandler);
+            /*
             BluetoothGattCharacteristic chara = mGatt.getService(service_uuid).getCharacteristic(characteristic_uuid);
             if(null != chara){
                 BluetoothGattDescriptor descriptor = chara.getDescriptor(UUID_DESCRIPTOR_UPDATE_NOTIFICATION);
                 descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
                 mGatt.writeDescriptor(descriptor);
             }
+            */
         }
     }
 
     private void read_characteristic(UUID service_uuid, UUID characteristic_uuid) {
-        if(null != mGatt) {
-            BluetoothGattCharacteristic chara = mGatt.getService(service_uuid).getCharacteristic(characteristic_uuid);
+        if(null != mGatt && null != mBTSmartService) {
+            Log.d(TAG, "write_characteristic:"+characteristic_uuid+" " + characteristic_uuid);
+            mBTSmartService.requestCharacteristicValue(0, service_uuid, characteristic_uuid, mGattServiceHandler);
+
+            /*BluetoothGattCharacteristic chara = mGatt.getService(service_uuid).getCharacteristic(characteristic_uuid);
             if(null != chara){
                 mGatt.readCharacteristic(chara);
                 //Log.d(TAG, "value="+chara.getValue());
-            }
+            }*/
         }
     }
 }

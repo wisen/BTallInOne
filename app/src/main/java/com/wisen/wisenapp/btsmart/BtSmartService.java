@@ -52,6 +52,15 @@ public class BtSmartService extends Service {
     public final static String EXTRA_DATA =
             "com.example.bluetooth.le.EXTRA_DATA";
 
+    public enum BtSmartStateTYPE{
+        BT_SMART_STATE_DISCONNECTED, BT_SMART_STATE_CONNECTED
+    };
+    private BtSmartStateTYPE BtSmartState = BtSmartStateTYPE.BT_SMART_STATE_DISCONNECTED;
+
+    public BtSmartStateTYPE get_BtSmartState(){
+        return BtSmartState;
+    }
+
     private void broadcastBtSmartStatus(final String action) {
         final Intent intent = new Intent(action);
         sendBroadcast(intent);
@@ -126,6 +135,7 @@ public class BtSmartService extends Service {
     public static final int MESSAGE_DESCRIPTOR_READ = 8;
     public static final int MESSAGE_DESCRIPTOR_WRITE = 9;
     public static final int MESSAGE_DESCRIPTOR_VALUE = 10;
+    public static final int MESSAGE_CHARACTERISTIC_CHANGE = 11;
 
     // // Keys to use for sending extra data with above messages.
     public static final String EXTRA_SCAN_RECORD = "SCANRECORD";
@@ -415,6 +425,60 @@ public class BtSmartService extends Service {
     }
 
     /**
+     * write the current value to the characteristic.
+     *
+     * @param requestId
+     *            An id provided by the caller that will be included in messages to the handler.
+     * @param service
+     *            The UUID of the service that contains the characteristic of interest.
+     * @param characteristic
+     *            The UUID of the characteristic.
+     * @param value
+     *            The value to be writen.
+     * @param valueHandler
+     *            The handler that will receive MESSAGE_CHARACTERISTIC_VALUE messages containing a byte array named
+     *            EXTRA_VALUE.
+     */
+    public void requestCharacteristicWrite(int requestId, UUID service, UUID characteristic, byte[] value, Handler valueHandler) {
+        Log.d(TAG, "requestCharacteristicWrite:"+characteristic);
+        if (currentRequest == null) {
+            Log.d(TAG, "requestCharacteristicWrite currentRequest is null.");
+            performWriteCharacteristicRequest(requestId, service, characteristic, value, valueHandler);
+        } else {
+            Log.d(TAG, "requestCharacteristicWrite currentRequest is not null, add it into queue.");
+            requestQueue.add(new BtSmartRequest(BtSmartRequest.RequestType.WRITE_CHARACTERISTIC, requestId, service, characteristic,
+                    null, valueHandler, value));
+        }
+    }
+
+    /**
+     * write the current value to the characteristic.
+     *
+     * @param requestId
+     *            An id provided by the caller that will be included in messages to the handler.
+     * @param service
+     *            The UUID of the service that contains the characteristic of interest.
+     * @param characteristic
+     *            The UUID of the characteristic.
+     * @param value
+     *            The value to be writen.
+     * @param valueHandler
+     *            The handler that will receive MESSAGE_CHARACTERISTIC_VALUE messages containing a byte array named
+     *            EXTRA_VALUE.
+     */
+    public void requestDescriptionWrite(int requestId, UUID service, UUID characteristic, UUID description, byte[] value, Handler valueHandler) {
+        Log.d(TAG, "requestDescriptionWrite:"+description);
+        if (currentRequest == null) {
+            Log.d(TAG, "requestDescriptionWrite currentRequest is null.");
+                    performWriteDescriptionRequest(requestId, service, characteristic, description, value, valueHandler);
+        } else {
+            Log.d(TAG, "requestDescriptionWrite currentRequest is not null, add it into queue.");
+            requestQueue.add(new BtSmartRequest(BtSmartRequest.RequestType.WRITE_DESCRIPTOR, requestId, service, characteristic,
+                    description, valueHandler, value));
+        }
+    }
+
+    /**
      * Request the current value of a descriptor. This will return the value once only in a MESSAGE_DESCRIPTOR_VALUE. If
      * a request is currently in progress then queue it. Use requestCharacteristicNotification() for constant updates
      * when a characteristic value changes.
@@ -629,9 +693,14 @@ public class BtSmartService extends Service {
                 // until the services have been discovered.
                 Log.d(TAG, "Connected to GATT server.");
                 mGattClient.discoverServices();
+                BtSmartState = BtSmartStateTYPE.BT_SMART_STATE_CONNECTED;
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 //sendMessage(mClientDeviceHandler, MESSAGE_DISCONNECTED);
+                Log.d(TAG, "disconnect to GATT server.");
+                BtSmartState = BtSmartStateTYPE.BT_SMART_STATE_DISCONNECTED;
                 broadcastBtSmartStatus(ACTION_GATT_DISCONNECTED);
+                requestQueue.clear();
+                currentRequest = null;
             }
         }
 
@@ -647,12 +716,13 @@ public class BtSmartService extends Service {
                     Log.d(TAG, "ServiceName:" + theService.getUuid());
 
                     characterList = theService.getCharacteristics();
+                    /*
                     for (BluetoothGattCharacteristic gattCharacteristic:characterList) {
                         mGattClient.readCharacteristic(gattCharacteristic);
                         Log.d(TAG,
                                 "---CharacterName:"
                                         + gattCharacteristic.getUuid());
-                    }
+                    }*/
                 }
 
                 //sendMessage(mClientDeviceHandler, MESSAGE_CONNECTED);
@@ -662,21 +732,17 @@ public class BtSmartService extends Service {
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-            // A notification for a characteristic has been received, so notify
-            // the registered Handler.
-            Handler notificationHandler = mNotificationHandlers.getHandler(characteristic.getService().getUuid(),
-                    characteristic.getUuid());
-            if (notificationHandler != null) {
+
+            Log.e(TAG, "onCharacteristicChanged: "+characteristic.getUuid());
+            if(null != mGattServiceHandler){
                 Bundle messageBundle = new Bundle();
-                Message msg = Message.obtain(notificationHandler, MESSAGE_CHARACTERISTIC_VALUE);
+                Message msg = Message.obtain(mGattServiceHandler, MESSAGE_CHARACTERISTIC_CHANGE);
+                messageBundle.putParcelable(EXTRA_CHARACTERISTIC_UUID, new ParcelUuid(characteristic.getUuid()));
                 messageBundle.putByteArray(EXTRA_VALUE, characteristic.getValue());
-                messageBundle.putParcelable(EXTRA_SERVICE_UUID, BtSmartUuid.get(characteristic.getService().getUuid())
-                        .getParcelable());
-                messageBundle.putParcelable(EXTRA_CHARACTERISTIC_UUID, BtSmartUuid.get(characteristic.getUuid())
-                        .getParcelable());
                 msg.setData(messageBundle);
                 msg.sendToTarget();
             }
+            //processNextRequest();这里不需要processNextRequest(), 因为handle value notification不是一个事务
         }
 
         /**
@@ -737,6 +803,7 @@ public class BtSmartService extends Service {
             BluetoothGattCharacteristic characteristic = descriptor.getCharacteristic();
             Log.d(TAG, "onDescriptorWrite:"+descriptor.getUuid());
             Log.d(TAG, "characteristic:"+characteristic.getUuid().toString());
+
             /*
             if (currentRequest.type == BtSmartRequest.RequestType.CHARACTERISTIC_NOTIFICATION) {
                 if (status != BluetoothGatt.GATT_SUCCESS) {
@@ -747,40 +814,23 @@ public class BtSmartService extends Service {
             } else if (currentRequest.type == BtSmartRequest.RequestType.WRITE_DESCRIPTOR) {
                 // TODO: If descriptor writing is implemented, add code here to
                 // send message to handler.
-            }
+            }*/
             processNextRequest();
-            */
+
         }
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            // This can only be in response to the current request as there
-            // can't be more than one in progress.
-            // So check this is what we were expecting.
-            Log.d(TAG, "onCharacteristicRead");
-            byte[] value=characteristic.getValue();
-            if (value!=null) {
-                String v = new String(value);
-                Log.d(TAG, "Value=" + v);
-            }
-
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(EXTRA_CHARACTERISTIC_UUID, new ParcelUuid(characteristic.getUuid()));
-            bundle.putByteArray(EXTRA_VALUE, characteristic.getValue());
-            bundle.putInt(EXTRA_PROPERTIES, characteristic.getProperties());
-            sendMessage(mGattServiceHandler, MESSAGE_CHARACTERISTIC_VALUE, bundle);
-
-            /*
+            Log.d(TAG, "onCharacteristicRead:"+characteristic.getUuid());
+            Log.d(TAG, "currentRequest.type="+currentRequest.type);
             if (currentRequest.type == BtSmartRequest.RequestType.READ_CHARACTERISTIC) {
                 if (currentRequest.notifyHandler != null) {
                     if (status == BluetoothGatt.GATT_SUCCESS) {
                         Bundle messageBundle = new Bundle();
                         Message msg = Message.obtain(currentRequest.notifyHandler, MESSAGE_CHARACTERISTIC_VALUE);
+                        messageBundle.putParcelable(EXTRA_CHARACTERISTIC_UUID, new ParcelUuid(characteristic.getUuid()));
                         messageBundle.putByteArray(EXTRA_VALUE, characteristic.getValue());
-                        messageBundle.putParcelable(EXTRA_SERVICE_UUID,
-                                BtSmartUuid.get(characteristic.getService().getUuid()).getParcelable());
-                        messageBundle.putParcelable(EXTRA_CHARACTERISTIC_UUID, BtSmartUuid
-                                .get(characteristic.getUuid()).getParcelable());
+                        messageBundle.putInt(EXTRA_PROPERTIES, characteristic.getProperties());
                         msg.setData(messageBundle);
                         msg.sendToTarget();
                     } else {
@@ -788,7 +838,32 @@ public class BtSmartService extends Service {
                     }
                 }
                 processNextRequest();
-            }*/
+            }
+        }
+
+        //@Override
+        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            Log.d(TAG, "onCharacteristicWrite:"+characteristic.getUuid());
+            Log.d(TAG, "currentRequest.type=" + currentRequest.type);
+            if (currentRequest.type == BtSmartRequest.RequestType.WRITE_CHARACTERISTIC) {
+                /*
+                if (currentRequest.notifyHandler != null) {
+                    if (status == BluetoothGatt.GATT_SUCCESS) {
+                        Bundle messageBundle = new Bundle();
+                        Message msg = Message.obtain(currentRequest.notifyHandler, MESSAGE_CHARACTERISTIC_WRITE);
+                        //messageBundle.putByteArray(EXTRA_VALUE, characteristic.getValue());
+                        //messageBundle.putParcelable(EXTRA_SERVICE_UUID,
+                                //BtSmartUuid.get(characteristic.getService().getUuid()).getParcelable());
+                        messageBundle.putParcelable(EXTRA_CHARACTERISTIC_UUID, BtSmartUuid
+                                .get(characteristic.getUuid()).getParcelable());
+                        msg.setData(messageBundle);
+                        msg.sendToTarget();
+                    } else {
+                        sendMessage(currentRequest.notifyHandler, currentRequest.requestId, MESSAGE_REQUEST_FAILED);
+                    }
+                }*/
+                processNextRequest();
+            }
         }
     };
 
@@ -906,10 +981,13 @@ public class BtSmartService extends Service {
      */
     private void processNextRequest() {
         if (requestQueue.isEmpty()) {
+            Log.d(TAG, "queue is empty.");
             currentRequest = null;
             return;
         }
+
         BtSmartRequest request = requestQueue.remove();
+        Log.d(TAG, "processNextRequest type=" + request.type);
         switch (request.type) {
             case CHARACTERISTIC_NOTIFICATION:
                 performNotificationRequest(request.requestId, request.serviceUuid, request.characteristicUuid,
@@ -923,6 +1001,14 @@ public class BtSmartService extends Service {
                 performDescValueRequest(request.requestId, request.serviceUuid, request.characteristicUuid,
                         request.descriptorUuid, request.notifyHandler);
                 break;
+            case WRITE_CHARACTERISTIC:
+                performWriteCharacteristicRequest(request.requestId, request.serviceUuid, request.characteristicUuid,
+                        request.value, request.notifyHandler);
+                break;
+            case WRITE_DESCRIPTOR:
+                performWriteDescriptionRequest(request.requestId, request.serviceUuid, request.characteristicUuid,
+                        request.descriptorUuid, request.value, request.notifyHandler);
+                    break;
             default:
                 break;
         }
@@ -979,15 +1065,90 @@ public class BtSmartService extends Service {
     private void performCharacValueRequest(int requestId, UUID service, UUID characteristic, Handler valueHandler) {
         // This currentRequest object will be used when we get the value back
         // asynchronously in the callback.
+        Log.d(TAG, "performCharacValueRequest: "+ service+ " " + characteristic);
         currentRequest = new BtSmartRequest(BtSmartRequest.RequestType.READ_CHARACTERISTIC, requestId, service, characteristic, null,
                 valueHandler);
         BluetoothGattService serviceObject = mGattClient.getService(service);
         if (serviceObject != null) {
             BluetoothGattCharacteristic characteristicObject = serviceObject.getCharacteristic(characteristic);
             if (characteristicObject != null) {
+                Log.d(TAG, "performCharacValueRequest: ");
                 if (!mGattClient.readCharacteristic(characteristicObject)) {
                     sendMessage(valueHandler, currentRequest.requestId, MESSAGE_REQUEST_FAILED);
                     processNextRequest();
+                }
+            }
+        }
+    }
+
+    /**
+     * Perform the write characteristic value request.
+     *
+     * @param requestId
+     *            An id provided by the caller that will be included in messages to the handler.
+     * @param service
+     *            The service that contains the characteristic of interest.
+     * @param characteristic
+     *            The characteristic to write the value to.
+     * @param value
+     *            The value to be writen to characteristic.
+     * @param valueHandler
+     *            The handler that will receive MESSAGE_CHARACTERISTIC_VALUE messages containing a byte array named
+     *            EXTRA_VALUE.
+     */
+    private void performWriteCharacteristicRequest(int requestId, UUID service, UUID characteristic, byte[] value, Handler valueHandler) {
+        // This currentRequest object will be used when we get the value back
+        // asynchronously in the callback.
+        Log.d(TAG, "performWriteCharacteristicRequest: "+ service+ " " + characteristic);
+        currentRequest = new BtSmartRequest(BtSmartRequest.RequestType.WRITE_CHARACTERISTIC, requestId, service, characteristic, null,
+                valueHandler);
+        BluetoothGattService serviceObject = mGattClient.getService(service);
+        if (serviceObject != null) {
+            BluetoothGattCharacteristic characteristicObject = serviceObject.getCharacteristic(characteristic);
+            if (characteristicObject != null) {
+                Log.d(TAG, "performWriteCharacteristicRequest: ");
+                characteristicObject.setValue(value);
+                if (!mGattClient.writeCharacteristic(characteristicObject)) {
+                    sendMessage(valueHandler, currentRequest.requestId, MESSAGE_REQUEST_FAILED);
+                    processNextRequest();
+                }
+            }
+        }
+    }
+
+    /**
+     * Perform the write characteristic value request.
+     *
+     * @param requestId
+     *            An id provided by the caller that will be included in messages to the handler.
+     * @param service
+     *            The service that contains the characteristic of interest.
+     * @param characteristic
+     *            The characteristic to write the value to.
+     * @param value
+     *            The value to be writen to characteristic.
+     * @param valueHandler
+     *            The handler that will receive MESSAGE_CHARACTERISTIC_VALUE messages containing a byte array named
+     *            EXTRA_VALUE.
+     */
+    private void performWriteDescriptionRequest(int requestId, UUID service, UUID characteristic, UUID description, byte[] value, Handler valueHandler) {
+        // This currentRequest object will be used when we get the value back
+        // asynchronously in the callback.
+        Log.d(TAG, "performWriteDescriptionRequest: "+ service+ " " + characteristic + " " + description);
+        currentRequest = new BtSmartRequest(BtSmartRequest.RequestType.WRITE_DESCRIPTOR, requestId, service, characteristic, description,
+                valueHandler);
+        BluetoothGattService serviceObject = mGattClient.getService(service);
+        if (serviceObject != null) {
+            BluetoothGattCharacteristic characteristicObject = serviceObject.getCharacteristic(characteristic);
+            if (characteristicObject != null) {
+                BluetoothGattDescriptor descriptor = characteristicObject.getDescriptor(description);
+                if(null != descriptor) {
+                    Log.d(TAG, "performWriteDescriptionRequest: ");
+                    descriptor.setValue(value);
+                    if (!mGattClient.writeDescriptor(descriptor)) {
+                        sendMessage(valueHandler, currentRequest.requestId, MESSAGE_REQUEST_FAILED);
+                        processNextRequest();
+                    }
                 }
             }
         }

@@ -20,7 +20,7 @@
 
     <string name="connecting_status">Connecting</string>
     <string name="connected_status">Connected.</string>
-    <string name="button_text_scan">scan smart devices</string>
+    <string name="button_text_scan">Start Scan</string>
 
     <string name="bluetooth_not_supported">bluetooth is not suported</string>
     <string name="ble_not_supported">ble is not supported</string>

@@ -57,7 +57,7 @@ public class ScanResultsActivity extends AppCompatActivity {
 
     // Adjust this value to control how long scan should last for. Higher values
     // will drain the battery more.
-    private static final long SCAN_PERIOD = 10000;
+    private static final long SCAN_PERIOD = 100000;
 
     ListView mScanListView = null;
 
@@ -83,6 +83,7 @@ public class ScanResultsActivity extends AppCompatActivity {
 
     private List<ScanFilter> mScanfilters = null;
 
+    private boolean scan_flag = true;
     // Used to filter scan results by UUID
     private static UUID uuidFilter[] = { BtSmartService.BtSmartUuid.HRP_SERVICE.getUuid() };
 
@@ -147,8 +148,9 @@ public class ScanResultsActivity extends AppCompatActivity {
                 public void run() {
                     //mBtAdapter.stopLeScan(mLeScanCallback);
                     mBluetoothLeScanner.stopScan(mScanCallback);
-                    mTextStatus.setText("");
-                    mScanButton.setEnabled(true);
+                    mTextStatus.setText("Scan stoped.");
+                    //mScanButton.setEnabled(true);
+                    mScanButton.setText("Start Scan");
                 }
             }, SCAN_PERIOD);
             mScanResults.clear();
@@ -157,11 +159,13 @@ public class ScanResultsActivity extends AppCompatActivity {
             mBluetoothLeScanner.startScan(mScanfilters, settings, mScanCallback);
 
             mTextStatus.setText("Scanning...");
-            mScanButton.setEnabled(false);
+            //mScanButton.setEnabled(false);
+            mScanButton.setText("Stop Scan");
         } else {
             mBluetoothLeScanner.stopScan(mScanCallback);
-            mTextStatus.setText("");
-            mScanButton.setEnabled(true);
+            mTextStatus.setText("Scan stoped.");
+            //mScanButton.setEnabled(true);
+            mScanButton.setText("Start Scan");
         }
     }
 
@@ -279,8 +283,16 @@ public class ScanResultsActivity extends AppCompatActivity {
     View.OnClickListener mScanButtonListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            /*
             if (mBtAdapter.isEnabled()) {
                 scanLeDevice(true);
+            }*/
+            if (scan_flag) {
+                scanLeDevice(true);
+                scan_flag = false;
+            } else {
+                scanLeDevice(false);
+                scan_flag = true;
             }
         }
     };

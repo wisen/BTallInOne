@@ -19,6 +19,7 @@ class BtSmartRequest {
     public UUID descriptorUuid;
     public Handler notifyHandler;
     public int requestId;
+    public byte[] value;
 
     public BtSmartRequest(RequestType type, int requestId, UUID service, UUID characteristic, UUID descriptor,
                           Handler handler) {
@@ -27,5 +28,15 @@ class BtSmartRequest {
         this.characteristicUuid = characteristic;
         this.descriptorUuid = descriptor;
         this.notifyHandler = handler;
+    }
+
+    public BtSmartRequest(RequestType type, int requestId, UUID service, UUID characteristic, UUID descriptor,
+                          Handler handler, byte[] value) {
+        this.type = type;
+        this.serviceUuid = service;
+        this.characteristicUuid = characteristic;
+        this.descriptorUuid = descriptor;
+        this.notifyHandler = handler;
+        this.value = value;
     }
 }

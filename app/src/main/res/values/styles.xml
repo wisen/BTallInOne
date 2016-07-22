@@ -6,6 +6,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:navigationBarColor">@color/black</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -19,5 +20,6 @@
 
     <style name="CustomTheme" parent="android:Theme">
         <item name="android:windowTitleSize">40dip</item>
+        <item name="android:colorBackground">@color/black</item>
     </style>
 </resources>

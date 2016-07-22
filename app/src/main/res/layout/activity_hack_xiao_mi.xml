@@ -58,7 +58,13 @@
 
     </ListView>
 
-
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="vibirate2"
+        android:id="@+id/btn_vib_test2"
+        android:layout_below="@+id/btn_vib_xiaomi"
+        android:layout_centerHorizontal="true" />
 
 
 </RelativeLayout>
