@@ -319,7 +319,7 @@ public class ScanResultsActivity extends AppCompatActivity {
      */
     private void startMainActivity(BluetoothDevice deviceToConnect) {
         Intent intent = null;
-        if (deviceToConnect.getName().toLowerCase().equals("mi")){
+        if (deviceToConnect.getName().toLowerCase().contains("mi")){
             intent = new Intent(this, HackXiaoMiActivity.class);
         } else {
             intent = new Intent(this, BTSmartActivity.class);

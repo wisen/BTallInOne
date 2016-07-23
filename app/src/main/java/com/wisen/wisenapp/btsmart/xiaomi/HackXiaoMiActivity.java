@@ -100,9 +100,14 @@ public class HackXiaoMiActivity extends AppCompatActivity {
     private static final UUID CHARA_UUID_ff03 = UUID.fromString("0000ff03-0000-1000-8000-00805f9b34fb");
     private static final UUID CHARA_UUID_ff07 = UUID.fromString("0000ff07-0000-1000-8000-00805f9b34fb");
     private static final UUID CHARA_UUID_ff01 = UUID.fromString("0000ff01-0000-1000-8000-00805f9b34fb");
+    //ff04 userinfo
     private static final UUID CHARA_UUID_ff04 = UUID.fromString("0000ff04-0000-1000-8000-00805f9b34fb");
     final byte[] write_into_ff04_1 = {(byte)0xf0, 0x69, (byte)0xf8, 0x3a, 0x00, 0x34, (byte)0xa0, 0x3e, 0x01, 0x00, 0x00,
             0x2d, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x59};
+    //c8:0f:10:00:86:58
+    final byte[] write_into_ff04_2 = {(byte)0xf0, 0x69, (byte)0xf8, 0x3a, 0x00, 0x34, (byte)0xa0, 0x3e, 0x01, 0x05, 0x00,
+            0x2d, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, (byte)0xb2};
+    //ff0a read write date time
     private static final UUID CHARA_UUID_ff0a = UUID.fromString("0000ff0a-0000-1000-8000-00805f9b34fb");
     final byte[] write_into_ff0a_1 = {0x10, 0x06, 0x08, 0x0b, 0x12, 0x0b,
             (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff};
@@ -176,9 +181,12 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         //delay_time(100);
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff01);
         //delay_time(100);
-        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff04, write_into_ff04_1);
+        UserInfo userInfo = new UserInfo(989358576, 1, 32, 172, 80, "wisen_wang", 1);
+        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff04, userInfo.getBytes(mDeviceToConnect.getAddress()));
+        //write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff04, write_into_ff04_1);
+        //write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff04, write_into_ff04_2);
         //delay_time(100);
-        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff0a, write_into_ff0a_1);
+        //write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff0a, write_into_ff0a_1);
         //delay_time(100);
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff01);
         //delay_time(100);
@@ -192,6 +200,8 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         //delay_time(100);
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff09);
         //delay_time(100);
+        //ff02 device name???
+        read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff02);
     }
 
     //called after recive the ff03 report 0x15
@@ -213,7 +223,7 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         //delay_time(100);
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_6);
         //delay_time(100);
-        write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff02, write_into_ff02_1);
+        //write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff02, write_into_ff02_1);
         //delay_time(100);
 
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff0d, write_into_ff0d_1);
@@ -634,6 +644,9 @@ public class HackXiaoMiActivity extends AppCompatActivity {
                             } else {
                                 Log.d(TAG, "firmware version format error!");
                             }
+                        } else {
+                            Log.d(TAG, "characteristicUuid:"+characteristicUuid);
+                            Log.d(TAG, "value:"+value[0]);
                         }
                         // and characteristicUuid tell you which characteristic
                         // the value belongs to.
