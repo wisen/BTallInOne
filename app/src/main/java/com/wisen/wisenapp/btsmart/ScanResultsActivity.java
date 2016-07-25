@@ -40,7 +40,9 @@ import com.wisen.wisenapp.R;
 import com.wisen.wisenapp.bt.DeviceListActivity;
 import com.wisen.wisenapp.bt.Saudioclient;
 import com.wisen.wisenapp.bt.Saudioserver;
+import com.wisen.wisenapp.btsmart.xiaomi.BondedDevice;
 import com.wisen.wisenapp.btsmart.xiaomi.HackXiaoMiActivity;
+import com.wisen.wisenapp.btsmart.xiaomi.XiaoMiUtil;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -121,6 +123,13 @@ public class ScanResultsActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mBondedDevicesList.clear();
+        scan_flag = true;
+    }
+
     /**
      * Start or stop scanning. Only scan for a limited amount of time defined by SCAN_PERIOD.
      *
@@ -151,6 +160,7 @@ public class ScanResultsActivity extends AppCompatActivity {
                     mTextStatus.setText("Scan stoped.");
                     //mScanButton.setEnabled(true);
                     mScanButton.setText("Start Scan");
+                    scan_flag = true;
                 }
             }, SCAN_PERIOD);
             mScanResults.clear();
@@ -161,11 +171,13 @@ public class ScanResultsActivity extends AppCompatActivity {
             mTextStatus.setText("Scanning...");
             //mScanButton.setEnabled(false);
             mScanButton.setText("Stop Scan");
+            scan_flag = false;
         } else {
             mBluetoothLeScanner.stopScan(mScanCallback);
             mTextStatus.setText("Scan stoped.");
             //mScanButton.setEnabled(true);
             mScanButton.setText("Start Scan");
+            scan_flag = true;
         }
     }
 
@@ -289,10 +301,8 @@ public class ScanResultsActivity extends AppCompatActivity {
             }*/
             if (scan_flag) {
                 scanLeDevice(true);
-                scan_flag = false;
             } else {
                 scanLeDevice(false);
-                scan_flag = true;
             }
         }
     };
@@ -311,6 +321,7 @@ public class ScanResultsActivity extends AppCompatActivity {
         }
     };
 
+    private static ArrayList<BondedDevice> mBondedDevicesList = new ArrayList<BondedDevice>();
     /**
      * Launch the main activity to connect to the device.
      *
@@ -321,11 +332,26 @@ public class ScanResultsActivity extends AppCompatActivity {
         Intent intent = null;
         if (deviceToConnect.getName().toLowerCase().contains("mi")){
             intent = new Intent(this, HackXiaoMiActivity.class);
+            BondedDevice device = new BondedDevice(deviceToConnect.getAddress(), deviceToConnect.getName());
+            if(XiaoMiUtil.isBondedFileExist()){
+                XiaoMiUtil.do_parser(mBondedDevicesList);
+                if(mBondedDevicesList.contains(device)){
+                    Log.d(TAG, "this device already in bonded list");
+                    intent.putExtra(XiaoMiUtil.BONDED_FLAG, XiaoMiUtil.XIAOMI_BONDED);
+                } else {
+                    Log.d(TAG, "this device not in bonded list");
+                    intent.putExtra(XiaoMiUtil.BONDED_FLAG, XiaoMiUtil.XIAOMI_NOT_BONDED);
+                }
+            } else {
+                Log.d(TAG, "the bonded file is not exsit");
+                intent.putExtra(XiaoMiUtil.BONDED_FLAG, XiaoMiUtil.XIAOMI_NOT_BONDED);
+            }
         } else {
             intent = new Intent(this, BTSmartActivity.class);
         }
 
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, deviceToConnect);
+
         this.startActivity(intent);
     }
 

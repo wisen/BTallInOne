@@ -20,7 +20,24 @@ public class CalculatorTest {
     @Test
     public void testSum() throws Exception {
         //expected: 6, sum of 1 and 5
-        assertEquals(6d, mCalculator.sum(1d, 5d), 0);
+        //assertEquals(6d, mCalculator.sum(1d, 5d), 0);
+        byte a = (byte)0x12;
+        byte b = (byte)0x34;
+        byte c = (byte)0xf8;
+        byte d = (byte)0x3a;
+
+        byte[] bRefArr = {0x12, 0x34};
+        int iOutcome = 0;
+        byte bLoop;
+        System.out.println(bRefArr.length);
+
+        for (int i = 0; i < bRefArr.length; i++) {
+            bLoop = bRefArr[i];
+            iOutcome += (bLoop & 0xFF) << (8 * i);
+            System.out.println("i:"+iOutcome);
+        }
+
+
     }
 
     @Test

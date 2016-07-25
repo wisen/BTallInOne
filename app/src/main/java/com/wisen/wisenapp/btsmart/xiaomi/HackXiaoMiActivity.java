@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.AssetManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -54,7 +55,7 @@ public class HackXiaoMiActivity extends AppCompatActivity {
     final byte[] orange = {0x0e,0x06,0x02,0x00,0x01};
 
     private List<BluetoothGattCharacteristic> mGattCharacterList = null;
-    private BluetoothDevice mDeviceToConnect = null;
+    private static BluetoothDevice mDeviceToConnect = null;
     //private ServiceInfo mServiceinfo = null;
     private BluetoothGattService mGattService = null;
     private BluetoothGatt mGatt = null;
@@ -75,11 +76,13 @@ public class HackXiaoMiActivity extends AppCompatActivity {
     private Button btn_vib_xiaomi = null;
     private Button btn_set_color = null;
     private Button btn_read_battery = null;
-    private Button btn_vib_test2 = null;
+    private Button btn_read_user_info = null;
     private Button btn_read_firmware_version = null;
     private static TextView battery_info = null;
 
+    private static ArrayList<BondedDevice> mBondedDevicesList = new ArrayList<BondedDevice>();
 
+    private int xiaomi_band_flag = 0;
     //5 main xiamo services and there are UUIDs
     //private BluetoothGattService XiaoMi_S1800 = null;
     private static final UUID XM_UUID_S1800 = UUID.fromString("00001800-0000-1000-8000-00805f9b34fb");
@@ -107,6 +110,18 @@ public class HackXiaoMiActivity extends AppCompatActivity {
     //c8:0f:10:00:86:58
     final byte[] write_into_ff04_2 = {(byte)0xf0, 0x69, (byte)0xf8, 0x3a, 0x00, 0x34, (byte)0xa0, 0x3e, 0x01, 0x05, 0x00,
             0x2d, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, (byte)0xb2};
+
+    //刚才有一个新发现, 就是手机未绑定手环(5.16.4.22)的时候和绑定后的数据,发送的数据如下:
+    //                                  ↓
+    //未绑定:0x f0 69 f8 3a 01 20 ac 50 01 05 00 77 69 73 65 6e 5f 77 61 63
+    //绑定后:0x f0 69 f8 3a 01 20 ac 50 00 05 00 77 69 73 65 6e 5f 77 61 b6
+    //可以看到就是第9个字节有区别
+    //那么下面试试另一个手环, version:
+    //                                  ↓
+    //未绑定:0x f0 69 f8 3a 01 20 ac 50 01 00 00 77 69 73 65 6e 5f 77 61 88
+    //绑定后:0x f0 69 f8 3a 01 20 ac 50 00 00 00 77 69 73 65 6e 5f 77 61 5d
+    //那么结论就来了, 如果未绑定的时候, 就发送1, 绑定后就发送0, 这样我就改一下Userinfo的成员type-->band_flag
+
     //ff0a read write date time
     private static final UUID CHARA_UUID_ff0a = UUID.fromString("0000ff0a-0000-1000-8000-00805f9b34fb");
     final byte[] write_into_ff0a_1 = {0x10, 0x06, 0x08, 0x0b, 0x12, 0x0b,
@@ -166,7 +181,9 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         RED,BLUE,ORANGE,GREEN,
     }
 
-    private void init_hank_sequence(){
+    //band_flag's value must be: 0 or 1
+    //1, begin banding; 0: already banded.
+    private void init_hank_sequence(int bond_flag){
         //这里之前没有加delay_time, 出现了大量的错误:writeCharacteristic: mDeviceBusy = true, and return false
         //后来看了sepc, spec上说了每一个request或者command都属于原子操作,同一时间只能完成一次事务,下面是原话:
         /*An attribute protocol request and response or indication-confirmation pair is
@@ -181,7 +198,7 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         //delay_time(100);
         read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff01);
         //delay_time(100);
-        UserInfo userInfo = new UserInfo(989358576, 1, 32, 172, 80, "wisen_wang", 1);
+        UserInfo userInfo = new UserInfo(989358576, 1, 32, 172, 80, "wisen_wang", bond_flag);
         write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff04, userInfo.getBytes(mDeviceToConnect.getAddress()));
         //write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff04, write_into_ff04_1);
         //write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff04, write_into_ff04_2);
@@ -252,18 +269,6 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         write_characteristic(XM_UUID_S1802, CHARA_UUID_2a06, write_into_2a06_1);
     }
 
-
-    private boolean vib_xiaomi_test2_flag = true;
-    private void vib_xiaomi_test2(){
-        if(!vib_xiaomi_test2_flag){
-            write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_vib_stop);
-            vib_xiaomi_test2_flag = true;
-        } else {
-            write_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff05, write_into_ff05_vib_until_stop);
-            vib_xiaomi_test2_flag = false;
-        }
-    }
-
     private void set_color(XIAOMI_COLOR color){
         switch(color){
             case RED:
@@ -294,6 +299,7 @@ public class HackXiaoMiActivity extends AppCompatActivity {
     }
 
     private TextView mTitle = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.CustomTheme);
@@ -305,12 +311,15 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         mTitle = (TextView) findViewById(R.id.title_left_text);
         mTitle.setText(TAG);
         mTitle = (TextView) findViewById(R.id.title_right_text);
+        mTitle.setText("Please init XiaoMi firstly!");
 
         registerReceiver(mGattUpdateReceiver, BTSmartUtil.getmAdapterIntentFilter());
 
         Intent intent = getIntent();
         mDeviceToConnect = intent.getExtras().getParcelable(BluetoothDevice.EXTRA_DEVICE);
+        xiaomi_band_flag = intent.getIntExtra(XiaoMiUtil.BONDED_FLAG, XiaoMiUtil.XIAOMI_NOT_BONDED);
         Log.d(TAG, "device name=" + mDeviceToConnect.getName());
+        Log.d(TAG, "device " + (xiaomi_band_flag==1?"not bonded":"bonded"));
         //mServiceinfo = (ServiceInfo)intent.getParcelableExtra(ServiceInfo.ServiceInfoKeyString);
         //mGattService = mServiceinfo.getService();
         //Log.d(TAG,"name="+mServiceinfo.getName());
@@ -342,7 +351,7 @@ public class HackXiaoMiActivity extends AppCompatActivity {
                             reconnectGatt();
                         }
                     } else if(mBTSmartService.get_BtSmartState() == BtSmartService.BtSmartStateTYPE.BT_SMART_STATE_CONNECTED){
-                        init_hank_sequence();
+                        init_hank_sequence(xiaomi_band_flag);
                     }
                 } else {
                     mTitle.setText("SmartSer not Conn");
@@ -350,8 +359,8 @@ public class HackXiaoMiActivity extends AppCompatActivity {
             }
         });
 
-        btn_vib_test2 = (Button)findViewById(R.id.btn_vib_test2);
-        btn_vib_test2.setOnClickListener(new View.OnClickListener() {
+        btn_read_user_info = (Button)findViewById(R.id.btn_read_user_info);
+        btn_read_user_info.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (null != mBTSmartService){
@@ -362,7 +371,7 @@ public class HackXiaoMiActivity extends AppCompatActivity {
                             reconnectGatt();
                         }
                     } else if(mBTSmartService.get_BtSmartState() == BtSmartService.BtSmartStateTYPE.BT_SMART_STATE_CONNECTED){
-                        vib_xiaomi_test2();
+                        read_characteristic(XM_UUID_Sfee0, CHARA_UUID_ff04);
                     }
                 } else {
                     mTitle.setText("SmartSer not Conn");
@@ -474,6 +483,7 @@ public class HackXiaoMiActivity extends AppCompatActivity {
                             if (null != mGattCharacterList) {
                                 //fill data into adapter
                                 fill_data_into_adapter(mGattCharacterList);
+                                init_hank_sequence(xiaomi_band_flag);
                             } else {
                                 Log.e(TAG, "get BluetoothGattCharacteristic list fail!!");
                             }
@@ -518,6 +528,7 @@ public class HackXiaoMiActivity extends AppCompatActivity {
         if(null != mBTSmartService){
             mBTSmartService.disconnect();
         }
+        mBondedDevicesList.clear();
         unbindService(mBTSmartServiceConnection);
         super.onDestroy();
     }
@@ -644,6 +655,24 @@ public class HackXiaoMiActivity extends AppCompatActivity {
                             } else {
                                 Log.d(TAG, "firmware version format error!");
                             }
+                        } else if(CHARA_UUID_ff04.equals(characteristicUuid)){
+                            if(value.length == 20){
+                                int id = XiaoMiUtil.BytetoInt(value, 4);
+                                String sex = (value[4]==1) ? "Male" : "Femal";
+                                int age = (value[5]&0xff);
+                                int height = ((int)value[6]&0xff);
+                                int weight = ((int)value[7]&0xff);
+                                String str = "";
+                                str += "Userinfo :\n";
+                                str += "ID: " + id + "\n";
+                                str += "Sex: "+sex + "\n";
+                                str += "Age: "+age + "\n";
+                                str += "Height: "+height+ "cm\n";
+                                str += "Weight: "+weight+ "kg\n";
+                                battery_info.setText(str);
+                            } else {
+                                Log.d(TAG, "firmware version format error!");
+                            }
                         } else {
                             Log.d(TAG, "characteristicUuid:"+characteristicUuid);
                             Log.d(TAG, "value:"+value[0]);
@@ -679,11 +708,39 @@ public class HackXiaoMiActivity extends AppCompatActivity {
                                 .getParcelable(BtSmartService.EXTRA_CHARACTERISTIC_UUID)).getUuid();
                         byte[] value = msgExtra.getByteArray(BtSmartService.EXTRA_VALUE);
                         Log.d(TAG, "value = " + value[0]);
-                        if(characteristicUuid.equals(CHARA_UUID_ff03) && value[0] == 0x15){
-                            Log.d(TAG, "now we can start init_hank_sequence2...");
-                            parentActivity.init_hank_sequence2();
+                        if(CHARA_UUID_ff03.equals(characteristicUuid)){
+                            //ff03 一般在未绑定时候, 并且手机发送绑定请求ff04[band_flag]=0x01后,返回2次: 0x06 和 0x13
+                            //如果这个时候敲击一下手环, 代表认可绑定, 并返回ff03= 0x0a 代表绑定成功.
+                            //如果是绑定后的手环, 手机发送ff04[band_flag]=0x00后, ff03返回0x05
+                            if(value.length == 1){
+                                if(0x0a == (value[0] & 0xff)){
+                                    Log.d(TAG, "bond success");
+                                    BondedDevice device = new BondedDevice(mDeviceToConnect.getAddress(), mDeviceToConnect.getName());
+                                    if(XiaoMiUtil.isBondedFileExist()){
+                                        XiaoMiUtil.do_parser(mBondedDevicesList);
+                                        if(!mBondedDevicesList.contains(device)){
+                                            Log.d(TAG, "the device not in boned file, add it!!");
+                                            mBondedDevicesList.add(device);
+                                            XiaoMiUtil.saveinfo(mBondedDevicesList);
+                                        }
+                                    } else {
+                                        if(!mBondedDevicesList.contains(device)){
+                                            Log.d(TAG, "the device not in boned file, add it!!");
+                                            mBondedDevicesList.add(device);
+                                            XiaoMiUtil.saveinfo(mBondedDevicesList);
+                                        }
+                                    }
+                                    //write the xiaomi into banded list
+                                } else if (0x05 == (value[0] & 0xff)) {
+                                    Log.d(TAG, "connect success");
+                                } else {
+                                    Log.d(TAG, "ff03: " + (value[0]&0xff));
+                                }
+                            } else {
+                                Log.d(TAG, "ff03 return error!");
+                            }
                         } else if (characteristicUuid.equals(CHARA_UUID_ff06)){
-                            battery_info.setText("Steps: " + value[0]);
+                            battery_info.setText("Steps: " + XiaoMiUtil.BytetoInt(value));
                         }else {
                             Log.d(TAG, "Notification: " + characteristicUuid + " "+value[0]);
                         }

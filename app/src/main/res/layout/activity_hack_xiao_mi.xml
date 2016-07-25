@@ -12,7 +12,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Write init"
+        android:text="Init"
         android:id="@+id/btn_write_sequence"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
@@ -61,8 +61,8 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="vibirate2"
-        android:id="@+id/btn_vib_test2"
+        android:text="UserInfo"
+        android:id="@+id/btn_read_user_info"
         android:layout_below="@+id/btn_vib_xiaomi"
         android:layout_centerHorizontal="true" />
 
@@ -71,7 +71,7 @@
         android:layout_height="wrap_content"
         android:text="firmware"
         android:id="@+id/btn_read_firmware_version"
-        android:layout_alignBottom="@+id/btn_vib_test2"
+        android:layout_alignBottom="@+id/btn_read_user_info"
         android:layout_alignStart="@+id/btn_set_color" />
 
 

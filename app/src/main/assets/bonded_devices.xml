@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bdevices>
+    <device>
+        <name>范冰冰</name>
+        <address>28</address>
+    </device>
+    <device>
+        <name>杨幂</name>
+        <address>23</address>
+    </device>
+
+</Bdevices>

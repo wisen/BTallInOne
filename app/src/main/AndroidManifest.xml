@@ -12,7 +12,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/wisen_app"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
@@ -42,7 +42,8 @@
         <activity android:name=".btsmart.GattServiceActivity" />
         <activity android:name=".btsmart.xiaomi.HackXiaoMiActivity" />
         <activity android:name=".ui.UIMainActivity" />
-        <activity android:name=".ui.expandablelistview.ExpandableListViewTestActivity"></activity>
+        <activity android:name=".ui.expandablelistview.ExpandableListViewTestActivity" />
+        <activity android:name=".btsmart.xiaomi.HackXMMainActivity"></activity>
     </application>
 
 </manifest>

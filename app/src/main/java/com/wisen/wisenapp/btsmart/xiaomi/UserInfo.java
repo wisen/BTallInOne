@@ -17,14 +17,14 @@ public class UserInfo
     private byte	height;		// cm
     private byte	weight;		// kg
     private String	alias	= "";
-    private byte	type;
+    private byte	bond_flag;//1, 未绑定; 0, 已绑定
 
     private UserInfo()
     {
 
     }
 
-    public UserInfo(int uid, int gender, int age, int height, int weight, String alias, int type)
+    public UserInfo(int uid, int gender, int age, int height, int weight, String alias, int bond_flag)
     {
         this.uid = uid;
         this.gender = (byte) gender;
@@ -32,7 +32,7 @@ public class UserInfo
         this.height = (byte) (height & 0xFF);
         this.weight = (byte) weight;
         this.alias = alias;
-        this.type = (byte) type;
+        this.bond_flag = (byte) bond_flag;
     }
 
     public static UserInfo fromByteData(byte[] data)
@@ -55,7 +55,7 @@ public class UserInfo
         {
             info.alias = "";
         }
-        info.type = data[data.length - 1];
+        info.bond_flag = data[data.length - 1];
 
         return info;
     }
@@ -79,7 +79,7 @@ public class UserInfo
         bf.put(this.age);
         bf.put(this.height);
         bf.put(this.weight);
-        bf.put(this.type);
+        bf.put(this.bond_flag);
 
         /*
         if(aliasBytes.length<=10)
@@ -95,6 +95,7 @@ public class UserInfo
         //老的版本从第10个字节开始就是alias, 但是新版本要用掉2个字节, 从12字节开始才是alias
         //那么这个0x05 0x00是什么东西呢? 是不是对应的版本的第一个号码5?
         //下次如果找到6.xx.x.xx的版本再来试试看,这里数据是不是变成了0x06 0x00
+
         bf.put((byte)0x05);
         bf.put((byte)0x00);
         if(aliasBytes.length<=8)
@@ -146,7 +147,7 @@ public class UserInfo
                 + ",height:" + this.getHeight()
                 + ",weight:" + this.getWeight()
                 + ",alias:" + this.alias
-                + ",type:" + this.type;
+                + ",type:" + this.bond_flag;
     }
 
     /**
@@ -202,6 +203,6 @@ public class UserInfo
      */
     public byte getType()
     {
-        return type;
+        return bond_flag;
     }
 }
