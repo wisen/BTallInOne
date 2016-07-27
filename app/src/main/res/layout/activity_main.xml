@@ -60,4 +60,12 @@
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/audioMainActivity"
         android:layout_marginStart="149dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PhoneBook"
+        android:id="@+id/btn_phone_book"
+        android:layout_alignBottom="@+id/audioMainActivity"
+        android:layout_alignParentEnd="true" />
 </RelativeLayout>

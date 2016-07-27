@@ -25,6 +25,7 @@ import com.wisen.wisenapp.btsmart.ScanResultsActivity;
 import com.wisen.wisenapp.btsmart.xiaomi.BondedDevice;
 import com.wisen.wisenapp.btsmart.xiaomi.HackXMMainActivity;
 import com.wisen.wisenapp.btsmart.xiaomi.XiaoMiUtil;
+import com.wisen.wisenapp.pbap.PbapMainActivity;
 import com.wisen.wisenapp.ui.UIMainActivity;
 
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private Button Btn_btAdv = null;
     private Button Btn_UIMain = null;
     private Button Btn_XiaoMIMain = null;
+    private Button Btn_phone_book = null;
 
     private static final String TAG = "WisenApp";
     private static final boolean D = true;
@@ -146,6 +148,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        Btn_phone_book= (Button)findViewById(R.id.btn_phone_book);
+        Btn_phone_book.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, PbapMainActivity.class);
+                startActivity(intent);
+            }
+        });
         //testxml();
     }
 

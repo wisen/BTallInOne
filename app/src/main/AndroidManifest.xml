@@ -43,7 +43,8 @@
         <activity android:name=".btsmart.xiaomi.HackXiaoMiActivity" />
         <activity android:name=".ui.UIMainActivity" />
         <activity android:name=".ui.expandablelistview.ExpandableListViewTestActivity" />
-        <activity android:name=".btsmart.xiaomi.HackXMMainActivity"></activity>
+        <activity android:name=".btsmart.xiaomi.HackXMMainActivity" />
+        <activity android:name=".pbap.PbapMainActivity"></activity>
     </application>
 
 </manifest>

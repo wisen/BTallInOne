@@ -1,0 +1,19 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.wisen.aidl_test1.BTMainActivity">
+    <item android:id="@+id/scann_device"
+        android:title="@string/scan"
+        android:orderInCategory="100"
+        />
+
+    <item android:id="@+id/discovery"
+        android:title="@string/discoverable"
+        android:orderInCategory="100"
+        />
+
+    <item android:id="@+id/pull_phonebook"
+        android:title="pull phone book"
+        android:orderInCategory="100"
+        />
+</menu>
