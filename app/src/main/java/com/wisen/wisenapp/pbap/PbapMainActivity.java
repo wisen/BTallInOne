@@ -123,6 +123,7 @@ public class PbapMainActivity extends AppCompatActivity {
                             mContactinfoList.add(info);
                             mContactsListAdapter.notifyDataSetChanged();
                         }
+                        update_contacts_handler.obtainMessage(MSG_PULL_ALL_CONTACTS_DONE, 0, 0, 0).sendToTarget();
                     }
                 }
                 break;
@@ -413,9 +414,8 @@ public class PbapMainActivity extends AppCompatActivity {
         }
 
         public void run() {
-            if(null != pbapClient) {
+            if (null != pbapClient) {
                 pbapClient.pullPhoneBook(BluetoothPbapClient.PB_PATH);
-                update_contacts_handler.obtainMessage(MSG_PULL_ALL_CONTACTS_DONE, 0, 0, 0).sendToTarget();
             }
         }
     }
@@ -473,6 +473,7 @@ public class PbapMainActivity extends AppCompatActivity {
                 values.put(android.provider.ContactsContract.Contacts.Data.RAW_CONTACT_ID, rawContactId);
                 values.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
                 if (null != phoneDataList) {
+                    Log.d(TAG, "---<<<<<<<<getPhoneList:" + phoneDataList);
                     for(VCardEntry.PhoneData phoneData : phoneDataList){
                         Log.d(TAG, "Tele: " + phoneData.getNumber());
                         values.put(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneData.getNumber());
@@ -507,7 +508,7 @@ public class PbapMainActivity extends AppCompatActivity {
                 //ArrayList<VCardEntry> list = mVCardEntryList;
                 Iterator<VCardEntry> it = null;
                 //if (list != null) {
-                    it = list.iterator();
+                it = list.iterator();
                 //}
                 Log.d(TAG, "--->doInBackground it:" + it);
                 int rawContactInsertIndex = 0;
