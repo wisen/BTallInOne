@@ -3,6 +3,7 @@ package com.wisen.wisenapp.pbap;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -76,6 +77,11 @@ public class PbapMainActivity extends AppCompatActivity {
     private static boolean read_contacts_permission = false;
     private static boolean write_contacts_permission = false;
 
+    private static final int MSG_UPDATE_CONTACT_ITEM_DONE = 900;
+    private static final int MSG_UPDATE_ALL_CONTACTS_DONE = 901;
+    private static final int MSG_PULL_ALL_CONTACTS_DONE = 902;
+    private ProgressDialog progressDialog;
+
     private ArrayList<VCardEntry> mVCardEntryList = new ArrayList<VCardEntry>();
 
     public class BluetoothServiceHandler extends Handler {
@@ -90,25 +96,32 @@ public class PbapMainActivity extends AppCompatActivity {
                     sPbapClient.disconnect();
                     mTitle.setText("Pull PB Done!");
                     if(null != mVCardEntryList){
-                        mContactsList = mVCardEntryList;
-                        mContactsListAdapter.notifyDataSetChanged();
                         update_contacts_flag = true;
                         invalidateOptionsMenu();
                         for(VCardEntry vCardEntry:mVCardEntryList){
+                            ContactInfo info = new ContactInfo();
                             Log.d(TAG, "Name: " + vCardEntry.getNameData().displayName);
+                            info.setName(vCardEntry.getNameData().displayName);
                             List<VCardEntry.PhoneData> phoneDataList = vCardEntry.getPhoneList();
                             List<VCardEntry.EmailData> emailDataList = vCardEntry.getEmailList();
                             if (null != phoneDataList) {
                                 for(VCardEntry.PhoneData phoneData : phoneDataList){
                                     Log.d(TAG, "Tele: " + phoneData.getNumber());
+                                    info.setPhoneNum(phoneData.getNumber());
+                                    info.setType(ContactInfo.ContactType.PHONE);
                                 }
                             }
 
                             if (null != emailDataList) {
                                 for(VCardEntry.EmailData emailData : emailDataList){
                                     Log.d(TAG, "Email: " + emailData.getAddress());
+                                    info.setPhoneNum(emailData.getAddress());
+                                    info.setType(ContactInfo.ContactType.EMAIL);
                                 }
                             }
+
+                            mContactinfoList.add(info);
+                            mContactsListAdapter.notifyDataSetChanged();
                         }
                     }
                 }
@@ -133,16 +146,47 @@ public class PbapMainActivity extends AppCompatActivity {
         }
     }
 
+    private final Handler update_contacts_handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            Log.d(TAG, "update_contacts msg = "+ msg.what);
+            switch (msg.what){
+                case MSG_UPDATE_CONTACT_ITEM_DONE:
+                    Log.d(TAG, "update item done!");
+                    progressDialog.dismiss();
+                    Toast.makeText(PbapMainActivity.this, "Update item done!", Toast.LENGTH_LONG).show();
+
+                    break;
+                case MSG_UPDATE_ALL_CONTACTS_DONE:
+                    Log.d(TAG, "update all done!");
+                    progressDialog.dismiss();
+                    Toast.makeText(PbapMainActivity.this, "Update all contacts done!", Toast.LENGTH_LONG).show();
+                    break;
+                case MSG_PULL_ALL_CONTACTS_DONE:
+                    Log.d(TAG, "pull all contatcts done!");
+                    progressDialog.dismiss();
+                    Toast.makeText(PbapMainActivity.this, "pull all contacts done!", Toast.LENGTH_LONG).show();
+                    break;
+            }
+        }
+    };
+
+    protected void onDestroy() {
+        super.onDestroy();
+        mVCardEntryList.clear();
+        mContactinfoList.clear();
+    }
+
     ListView contacts_listview = null;
     private static ContactsListAdapter mContactsListAdapter;
-    private ArrayList<VCardEntry> mContactsList = new ArrayList<VCardEntry>();
+    private ArrayList<ContactInfo> mContactinfoList = new ArrayList<ContactInfo>();
 
     private class ContactsListAdapter extends BaseAdapter {
         private Activity activity;
-        private ArrayList<VCardEntry> data;
+        private ArrayList<ContactInfo> data;
         private LayoutInflater inflater = null;
 
-        public ContactsListAdapter(Activity a, ArrayList<VCardEntry> object) {
+        public ContactsListAdapter(Activity a, ArrayList<ContactInfo> object) {
             activity = a;
             data = object;
             inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -168,23 +212,14 @@ public class PbapMainActivity extends AppCompatActivity {
             TextView contactname = (TextView) vi.findViewById(R.id.contact_name);
             TextView contactphonenum = (TextView) vi.findViewById(R.id.contact_phonenum);
 
-            VCardEntry cardEntry = (VCardEntry) data.get(position);
-            contactname.setText(cardEntry.getDisplayName());
-            List<VCardEntry.PhoneData> phoneDataList = cardEntry.getPhoneList();
-            List<VCardEntry.EmailData> emailDataList = cardEntry.getEmailList();
-            if (null != phoneDataList) {
-                for(VCardEntry.PhoneData phoneData : phoneDataList){
-                    Log.d(TAG, "Tele: " + phoneData.getNumber());
-                    contactphonenum.setText(phoneData.getNumber());
-                }
+            ContactInfo info = (ContactInfo) data.get(position);
+            contactname.setText("Name: " + info.getName());
+            if(ContactInfo.ContactType.PHONE == info.getType()){
+                contactphonenum.setText("Phone: " + info.getPhoneNum());
+            } else {
+                contactphonenum.setText("Email: " + info.getPhoneNum());
             }
 
-            if (null != emailDataList) {
-                for(VCardEntry.EmailData emailData : emailDataList){
-                    Log.d(TAG, "Email: " + emailData.getAddress());
-                    contactphonenum.setText(emailData.getAddress());
-                }
-            }
             return vi;
         }
     }
@@ -193,12 +228,16 @@ public class PbapMainActivity extends AppCompatActivity {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            final VCardEntry cardEntry = (VCardEntry)mContactsListAdapter.getItem(position);
-            Log.d(TAG, "name: " + cardEntry.getDisplayName());
-            update_contacts_item(cardEntry);
+            final ContactInfo info = (ContactInfo)mContactsListAdapter.getItem(position);
+            for(VCardEntry vCardEntry:mVCardEntryList){
+                if(vCardEntry.getNameData().displayName.equals(info.getName())){
+                    Log.d(TAG, "name: " + info.getName());
+                    update_contacts_item(vCardEntry);
+                    break;
+                }
+            }
         }
     };
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -215,7 +254,7 @@ public class PbapMainActivity extends AppCompatActivity {
         mTitle = (TextView) findViewById(R.id.title_right_text);
 
         contacts_listview = (ListView)findViewById(R.id.recieved_contacts_list);
-        mContactsListAdapter = new ContactsListAdapter(this, mContactsList);
+        mContactsListAdapter = new ContactsListAdapter(this, mContactinfoList);
         contacts_listview.setAdapter(mContactsListAdapter);
         contacts_listview.setOnItemClickListener(mContactsListClickListener);
 
@@ -362,118 +401,193 @@ public class PbapMainActivity extends AppCompatActivity {
         return false;
     }
 
+    private enum UpdateType {
+        ITEM, ALL,
+    };
+
+    private class PullThread extends Thread {
+        private final BluetoothPbapClient pbapClient;
+
+        public PullThread(BluetoothPbapClient pbapClient) {
+            this.pbapClient = pbapClient;
+        }
+
+        public void run() {
+            if(null != pbapClient) {
+                pbapClient.pullPhoneBook(BluetoothPbapClient.PB_PATH);
+                update_contacts_handler.obtainMessage(MSG_PULL_ALL_CONTACTS_DONE, 0, 0, 0).sendToTarget();
+            }
+        }
+    }
+
+    private class UpdateThread extends Thread {
+        private final VCardEntry vCardEntry;
+        private final ArrayList<VCardEntry> list;
+        private final UpdateType updateType;
+
+        public UpdateThread(ArrayList<VCardEntry> list) {
+            Log.d(TAG, "UpdateThread list");
+            this.list = list;
+            this.updateType = UpdateType.ALL;
+            this.vCardEntry = null;
+        }
+
+        public UpdateThread(VCardEntry vCardEntry) {
+            Log.d(TAG, "UpdateThread vCardEntry");
+            this.vCardEntry = vCardEntry;
+            this.updateType = UpdateType.ITEM;
+            this.list = null;
+        }
+
+        @Override
+        public void run() {
+            if(UpdateType.ALL == this.updateType && null != list){
+                Log.e(TAG, "update all contacts!");
+                update_all();
+            } else if(UpdateType.ITEM == this.updateType && null != vCardEntry){
+                Log.e(TAG, "update contacts item!");
+                update_item();
+            }
+        }
+
+        public void update_item(){
+            if(null != vCardEntry) {
+                List<VCardEntry.PhoneData> phoneDataList = vCardEntry.getPhoneList();
+                List<VCardEntry.EmailData> emailDataList = vCardEntry.getEmailList();
+
+                ContentValues values = new ContentValues();
+                //首先向RawContacts.CONTENT_URI执行一个空值插入，目的是获取系统返回的rawContactId
+                Uri rawContactUri = getContentResolver().insert(ContactsContract.RawContacts.CONTENT_URI, values);
+                long rawContactId = ContentUris.parseId(rawContactUri);
+
+                //往data表入姓名数据
+                values.clear();
+                values.put(ContactsContract.Data.RAW_CONTACT_ID, rawContactId);
+                values.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE);
+                values.put(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME, vCardEntry.getDisplayName());
+                getContentResolver().insert(
+                        android.provider.ContactsContract.Data.CONTENT_URI, values);
+
+                //往data表入电话数据
+                values.clear();
+                values.put(android.provider.ContactsContract.Contacts.Data.RAW_CONTACT_ID, rawContactId);
+                values.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
+                if (null != phoneDataList) {
+                    for(VCardEntry.PhoneData phoneData : phoneDataList){
+                        Log.d(TAG, "Tele: " + phoneData.getNumber());
+                        values.put(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneData.getNumber());
+                    }
+                }
+                values.put(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE);
+                getContentResolver().insert(
+                        android.provider.ContactsContract.Data.CONTENT_URI, values);
+
+                //往data表入Email数据
+                values.clear();
+                values.put(android.provider.ContactsContract.Contacts.Data.RAW_CONTACT_ID, rawContactId);
+                values.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE);
+                if (null != emailDataList) {
+                    for(VCardEntry.EmailData emailData : emailDataList){
+                        Log.d(TAG, "Email: " + emailData.getAddress());
+                        values.put(ContactsContract.CommonDataKinds.Email.DATA, emailData.getAddress());
+                    }
+                }
+                values.put(ContactsContract.CommonDataKinds.Email.TYPE, ContactsContract.CommonDataKinds.Email.TYPE_WORK);
+                getContentResolver().insert(
+                        android.provider.ContactsContract.Data.CONTENT_URI, values);
+
+                update_contacts_handler.obtainMessage(MSG_UPDATE_CONTACT_ITEM_DONE, 0, 0, 0).sendToTarget();
+            }
+        }
+
+        public void update_all(){
+            if(null != list){
+                ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+
+                //ArrayList<VCardEntry> list = mVCardEntryList;
+                Iterator<VCardEntry> it = null;
+                //if (list != null) {
+                    it = list.iterator();
+                //}
+                Log.d(TAG, "--->doInBackground it:" + it);
+                int rawContactInsertIndex = 0;
+                while(it!= null && it.hasNext()) {
+                    VCardEntry mv = it.next();
+                    rawContactInsertIndex = ops.size(); // 有了它才能给真正的实现批量添加
+                    Log.d(TAG, "--->>>>>>>name:" + mv.getDisplayName());
+                    Log.d(TAG, "--->>>>>>>getPhoneList:" + mv.getPhoneList());
+                    if (mv.getPhoneList() != null) {
+                        ops.add(ContentProviderOperation
+                                .newInsert(ContactsContract.RawContacts.CONTENT_URI)
+                                .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, ContactsContract.RawContacts.ACCOUNT_NAME)
+                                .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, ContactsContract.RawContacts.ACCOUNT_TYPE)
+                                .withYieldAllowed(true).build());
+                        // add name
+                        ops.add(ContentProviderOperation
+                                .newInsert(ContactsContract.Data.CONTENT_URI)
+                                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
+                                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                                .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, mv.getDisplayName())
+                                .withYieldAllowed(true).build());
+                        // add number
+                        for(VCardEntry.PhoneData phone : mv.getPhoneList()) {
+                            Log.d(TAG, "--->>>>>>>number:" + phone.getNumber());
+                            ops.add(ContentProviderOperation
+                                    .newInsert(ContactsContract.Data.CONTENT_URI)
+                                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
+                                    .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                                    .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phone.getNumber())
+                                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
+                                    .withValue(ContactsContract.CommonDataKinds.Phone.LABEL, "")
+                                    .withYieldAllowed(true).build());
+                        }
+                    }
+                }
+                ContentProviderResult[] results = null;
+                if (ops != null) {
+                    try {
+                        results = getContentResolver()
+                                .applyBatch(ContactsContract.AUTHORITY, ops);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, String.format("%s: %s", e.toString(), e.getMessage()));
+                    } catch (OperationApplicationException e) {
+                        Log.e(TAG, String.format("%s: %s", e.toString(), e.getMessage()));
+                    }
+
+                }
+
+                update_contacts_handler.obtainMessage(MSG_UPDATE_ALL_CONTACTS_DONE, 0, 0, 0).sendToTarget();
+            }
+        }
+    }
+
     private void update_contacts_item(VCardEntry mv){
-        List<VCardEntry.PhoneData> phoneDataList = mv.getPhoneList();
-        List<VCardEntry.EmailData> emailDataList = mv.getEmailList();
+        Log.d(TAG, "update_contacts_item");
+        progressDialog = ProgressDialog.show(PbapMainActivity.this, "Updating contact", "Please wait...");
 
-        ContentValues values = new ContentValues();
-        //首先向RawContacts.CONTENT_URI执行一个空值插入，目的是获取系统返回的rawContactId
-        Uri rawContactUri = getContentResolver().insert(ContactsContract.RawContacts.CONTENT_URI, values);
-        long rawContactId = ContentUris.parseId(rawContactUri);
-
-        //往data表入姓名数据
-        values.clear();
-        values.put(ContactsContract.Data.RAW_CONTACT_ID, rawContactId);
-        values.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE);
-        values.put(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME, mv.getDisplayName());
-        getContentResolver().insert(
-                android.provider.ContactsContract.Data.CONTENT_URI, values);
-
-        //往data表入电话数据
-        values.clear();
-        values.put(android.provider.ContactsContract.Contacts.Data.RAW_CONTACT_ID, rawContactId);
-        values.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
-        if (null != phoneDataList) {
-            for(VCardEntry.PhoneData phoneData : phoneDataList){
-                Log.d(TAG, "Tele: " + phoneData.getNumber());
-                values.put(ContactsContract.CommonDataKinds.Phone.NUMBER, phoneData.getNumber());
-            }
-        }
-        values.put(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE);
-        getContentResolver().insert(
-                android.provider.ContactsContract.Data.CONTENT_URI, values);
-
-        //往data表入Email数据
-        values.clear();
-        values.put(android.provider.ContactsContract.Contacts.Data.RAW_CONTACT_ID, rawContactId);
-        values.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE);
-        if (null != emailDataList) {
-            for(VCardEntry.EmailData emailData : emailDataList){
-                Log.d(TAG, "Email: " + emailData.getAddress());
-                values.put(ContactsContract.CommonDataKinds.Email.DATA, emailData.getAddress());
-            }
-        }
-        values.put(ContactsContract.CommonDataKinds.Email.TYPE, ContactsContract.CommonDataKinds.Email.TYPE_WORK);
-        getContentResolver().insert(
-                android.provider.ContactsContract.Data.CONTENT_URI, values);
+        UpdateThread updateitemThread = new UpdateThread(mv);
+        updateitemThread.start();
     }
 
     private void update_all_contacts(){
-        ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+        progressDialog = ProgressDialog.show(PbapMainActivity.this, "Updating contacts List", "Please wait...");
 
-        ArrayList<VCardEntry> list = mVCardEntryList;
-        Iterator<VCardEntry> it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        Log.d(TAG, "--->doInBackground it:" + it);
-        int rawContactInsertIndex = 0;
-        while(it!= null && it.hasNext()) {
-            VCardEntry mv = it.next();
-            rawContactInsertIndex = ops.size(); // 有了它才能给真正的实现批量添加
-            Log.d(TAG, "--->>>>>>>name:" + mv.getDisplayName());
-            Log.d(TAG, "--->>>>>>>getPhoneList:" + mv.getPhoneList());
-            if (mv.getPhoneList() != null) {
-                ops.add(ContentProviderOperation
-                        .newInsert(ContactsContract.RawContacts.CONTENT_URI)
-                        .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, ContactsContract.RawContacts.ACCOUNT_NAME)
-                        .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, ContactsContract.RawContacts.ACCOUNT_TYPE)
-                        .withYieldAllowed(true).build());
-                // add name
-                ops.add(ContentProviderOperation
-                        .newInsert(ContactsContract.Data.CONTENT_URI)
-                        .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
-                        .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
-                        .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, mv.getDisplayName())
-                        .withYieldAllowed(true).build());
-                // add number
-                for(VCardEntry.PhoneData phone : mv.getPhoneList()) {
-                    Log.d(TAG, "--->>>>>>>number:" + phone.getNumber());
-                    ops.add(ContentProviderOperation
-                            .newInsert(ContactsContract.Data.CONTENT_URI)
-                            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
-                            .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
-                            .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phone.getNumber())
-                            .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
-                            .withValue(ContactsContract.CommonDataKinds.Phone.LABEL, "")
-                            .withYieldAllowed(true).build());
-                }
-            }
-        }
-        ContentProviderResult[] results = null;
-        if (ops != null) {
-            try {
-                results = getContentResolver()
-                        .applyBatch(ContactsContract.AUTHORITY, ops);
-            } catch (RemoteException e) {
-                Log.e(TAG, String.format("%s: %s", e.toString(), e.getMessage()));
-            } catch (OperationApplicationException e) {
-                Log.e(TAG, String.format("%s: %s", e.toString(), e.getMessage()));
-            }
-
-        }
+        UpdateThread updateallThread = new UpdateThread(mVCardEntryList);
+        updateallThread.start();
     }
 
     public void getPhoneBook() {
+
         if (sPbapClient != null && sPbapClient.getState() == BluetoothPbapClient.ConnectionState.CONNECTED) {
             Log.d(TAG,"pulling the PhoneBook, it may take a long time ! ");
-            sPbapClient.pullPhoneBook(BluetoothPbapClient.PB_PATH);
+            progressDialog = ProgressDialog.show(PbapMainActivity.this, "Pulling contacts", "Please wait...");
+            PullThread pullThread = new PullThread(sPbapClient);
+            pullThread.start();
         } else {
             Log.d(TAG,"-----------------------------");
             Log.d(TAG,"sPbapClient is not ready ! ");
             Log.d(TAG,"sPbapClient:"+ sPbapClient.getState());
             Log.d(TAG,"-----------------------------");
-
         }
     }
 
