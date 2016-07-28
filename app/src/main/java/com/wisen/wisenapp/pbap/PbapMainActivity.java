@@ -443,7 +443,7 @@ public class PbapMainActivity extends AppCompatActivity {
         public void run() {
             if(UpdateType.ALL == this.updateType && null != list){
                 Log.e(TAG, "update all contacts!");
-                update_all();
+                update_all2();
             } else if(UpdateType.ITEM == this.updateType && null != vCardEntry){
                 Log.e(TAG, "update contacts item!");
                 update_item();
@@ -498,6 +498,83 @@ public class PbapMainActivity extends AppCompatActivity {
                         android.provider.ContactsContract.Data.CONTENT_URI, values);
 
                 update_contacts_handler.obtainMessage(MSG_UPDATE_CONTACT_ITEM_DONE, 0, 0, 0).sendToTarget();
+            }
+        }
+
+        public void update_all2(){
+            if(null != list){
+                ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+
+                //ArrayList<VCardEntry> list = mVCardEntryList;
+                Iterator<VCardEntry> it = null;
+                //if (list != null) {
+                it = list.iterator();
+                //}
+                Log.d(TAG, "--->doInBackground it:" + it);
+                int rawContactInsertIndex = 0;
+                while(it!= null && it.hasNext()) {
+                    VCardEntry mv = it.next();
+                    rawContactInsertIndex = ops.size(); // 有了它才能给真正的实现批量添加
+                    Log.d(TAG, "--->>>>>>>name:" + mv.getDisplayName());
+                    Log.d(TAG, "--->>>>>>>getPhoneList:" + mv.getPhoneList());
+                    Log.d(TAG, "--->>>>>>>rawContactInsertIndex:" + rawContactInsertIndex);
+
+                    ops.add(ContentProviderOperation
+                            .newInsert(ContactsContract.RawContacts.CONTENT_URI)
+                            .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
+                            .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, null)
+                            .withYieldAllowed(true).build());
+
+                    // add name
+                    ops.add(ContentProviderOperation
+                            .newInsert(ContactsContract.Data.CONTENT_URI)
+                            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
+                            .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                            .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, mv.getDisplayName())
+                            .withYieldAllowed(true).build());
+
+                    if (mv.getPhoneList() != null) {
+                        // add number
+                        for(VCardEntry.PhoneData phone : mv.getPhoneList()) {
+                            Log.d(TAG, "--->>>>>>>number:" + phone.getNumber());
+                            ops.add(ContentProviderOperation
+                                    .newInsert(ContactsContract.Data.CONTENT_URI)
+                                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
+                                    .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                                    .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phone.getNumber())
+                                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
+                                    .withValue(ContactsContract.CommonDataKinds.Phone.LABEL, "")
+                                    .withYieldAllowed(true).build());
+                        }
+                    }
+
+                    if (mv.getEmailList() != null) {
+                        // add number
+                        for(VCardEntry.EmailData email : mv.getEmailList()) {
+                            Log.d(TAG, "--->>>>>>>email:" + email.getAddress());
+                            ops.add(ContentProviderOperation
+                                    .newInsert(ContactsContract.Data.CONTENT_URI)
+                                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
+                                    .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                                    .withValue(ContactsContract.CommonDataKinds.Email.ADDRESS, email.getAddress())
+                                    .withYieldAllowed(true).build());
+                        }
+                    }
+                }
+                ContentProviderResult[] results = null;
+                if (ops != null) {
+                    try {
+                        results = getContentResolver()
+                                .applyBatch(ContactsContract.AUTHORITY, ops);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, String.format("%s: %s", e.toString(), e.getMessage()));
+                    } catch (OperationApplicationException e) {
+                        Log.e(TAG, String.format("%s: %s", e.toString(), e.getMessage()));
+                    }
+
+                }
+
+                update_contacts_handler.obtainMessage(MSG_UPDATE_ALL_CONTACTS_DONE, 0, 0, 0).sendToTarget();
             }
         }
 

@@ -19,4 +19,9 @@ root cause:
 		如果你是断线了, 就重连, 没断线, 那么继续发送我们的request
 next action:
 		添加一个BtSmartServiceStateMachine, 这个状态更新目前的状态,每一个请求都应该判断当前的状态
+		
+3. 
+date: 2016-07-28
+记录一个issue, 目前的版本用update_item来写入contact后,然后从对端再来pull phone book可以找到刚才写入的contact
+但是如果用update_all来批量写入contacts后, 然后从对端再来pull phone book就找不到刚才批量写入的contacts. 原因待查..
      
