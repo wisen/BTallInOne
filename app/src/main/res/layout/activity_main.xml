@@ -68,4 +68,12 @@
         android:id="@+id/btn_phone_book"
         android:layout_alignBottom="@+id/audioMainActivity"
         android:layout_alignParentEnd="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="MicPHone"
+        android:id="@+id/btn_micphone"
+        android:layout_alignBottom="@+id/btSmartActivity"
+        android:layout_alignParentEnd="true" />
 </RelativeLayout>

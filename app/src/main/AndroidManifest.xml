@@ -9,8 +9,8 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_CONTACTS"/>
-    <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
 
     <application
         android:allowBackup="true"
@@ -46,7 +46,8 @@
         <activity android:name=".ui.UIMainActivity" />
         <activity android:name=".ui.expandablelistview.ExpandableListViewTestActivity" />
         <activity android:name=".btsmart.xiaomi.HackXMMainActivity" />
-        <activity android:name=".pbap.PbapMainActivity"></activity>
+        <activity android:name=".pbap.PbapMainActivity" />
+        <activity android:name=".micphone.MicPhoneMainActivity"></activity>
     </application>
 
 </manifest>

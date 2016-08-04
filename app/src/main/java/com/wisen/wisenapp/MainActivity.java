@@ -25,6 +25,7 @@ import com.wisen.wisenapp.btsmart.ScanResultsActivity;
 import com.wisen.wisenapp.btsmart.xiaomi.BondedDevice;
 import com.wisen.wisenapp.btsmart.xiaomi.HackXMMainActivity;
 import com.wisen.wisenapp.btsmart.xiaomi.XiaoMiUtil;
+import com.wisen.wisenapp.micphone.MicPhoneMainActivity;
 import com.wisen.wisenapp.pbap.PbapMainActivity;
 import com.wisen.wisenapp.ui.UIMainActivity;
 
@@ -43,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private Button Btn_UIMain = null;
     private Button Btn_XiaoMIMain = null;
     private Button Btn_phone_book = null;
+    private Button Btn_micPhone = null;
 
     private static final String TAG = "WisenApp";
     private static final boolean D = true;
@@ -130,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Btn_UIMain= (Button)findViewById(R.id.btn_uimain);
+        Btn_UIMain = (Button)findViewById(R.id.btn_uimain);
         Btn_UIMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -139,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Btn_XiaoMIMain= (Button)findViewById(R.id.btn_hack_xm);
+        Btn_XiaoMIMain = (Button)findViewById(R.id.btn_hack_xm);
         Btn_XiaoMIMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -149,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        Btn_phone_book= (Button)findViewById(R.id.btn_phone_book);
+        Btn_phone_book = (Button)findViewById(R.id.btn_phone_book);
         Btn_phone_book.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -157,7 +159,16 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        //testxml();
+
+        Btn_micPhone = (Button)findViewById(R.id.btn_micphone);
+        Btn_micPhone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, MicPhoneMainActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     @Override
