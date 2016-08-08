@@ -28,26 +28,37 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".bt.BTMainActivity" />
+        <activity android:name=".bt.BTMainActivity"
+            android:label="BtMain"/>
         <activity android:name=".bt.DeviceListActivity" />
         <activity android:name=".test.TestMainActivity" />
-        <activity android:name=".audio.AudioMainActivity" />
-        <activity android:name=".btsmart.BTSmartActivity" />
+        <activity android:name=".audio.AudioMainActivity"
+            android:label="Audio"/>
+        <activity android:name=".btsmart.BTSmartActivity"
+            android:label="BtSmart"/>
 
         <service
             android:name=".btsmart.BtSmartService"
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".btsmart.ScanResultsActivity" />
+        <activity android:name=".btsmart.ScanResultsActivity"
+            android:label="BtSmart"/>
         <activity android:name=".btadv.BTAdvActivity" />
-        <activity android:name=".btsmart.GattServiceActivity" />
-        <activity android:name=".btsmart.xiaomi.HackXiaoMiActivity" />
-        <activity android:name=".ui.UIMainActivity" />
-        <activity android:name=".ui.expandablelistview.ExpandableListViewTestActivity" />
-        <activity android:name=".btsmart.xiaomi.HackXMMainActivity" />
-        <activity android:name=".pbap.PbapMainActivity" />
-        <activity android:name=".micphone.MicPhoneMainActivity"></activity>
+        <activity android:name=".btsmart.GattServiceActivity"
+            android:label="BtSmart"/>
+        <activity android:name=".btsmart.xiaomi.HackXiaoMiActivity"
+            android:label="BtSmart-HackXiaoMi"/>
+        <activity android:name=".ui.UIMainActivity"
+            android:label="UI"/>
+        <activity android:name=".ui.expandablelistview.ExpandableListViewTestActivity"
+            android:label="UI"/>
+        <activity android:name=".btsmart.xiaomi.HackXMMainActivity"
+            android:label="BtSmart-HackXiaoMi"/>
+        <activity android:name=".pbap.PbapMainActivity"
+            android:label="PBAP"/>
+        <activity android:name=".micphone.MicPhoneMainActivity"
+            android:label="MicPhone"></activity>
     </application>
 
 </manifest>
